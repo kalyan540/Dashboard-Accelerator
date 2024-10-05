@@ -1,3 +1,3 @@
 # Dashboard-Accelerator
 
-Utilizing Opensource "Apache Superset" project for customization
+Utilizing Open source project "Apache Superset"
