@@ -717,93 +717,6 @@ class SupersetIndexView(IndexView):
             print(f"Error occurred: {e}")
             return jsonify({'error': str(e)}), 500
 
-    @expose("/api/upload", methods=["POST"])
-    def upload_keys(self) -> FlaskResponse:
-        try:
-            data = request.json
-            selected_keys = data.get('keys', [])
-            url = data.get('url')
-            table_name = data.get('table_name')
-            
-            if not url or not table_name:
-                return jsonify({'error': 'URL and table name are required'}), 400
-
-            logger.info(selected_keys)
-            response = requests.get(url)
-            api_data = response.json()
-
-            # Determine the root of the data by using the first selected key's root
-            first_key = selected_keys[0] if selected_keys else None
-            if not first_key:
-                return jsonify({'error': 'No keys selected'}), 400
-            
-            root_key = first_key.split('.')[0]  # Get the root key from the first key
-            results_data = api_data.get(root_key, [])  # Dynamically access the root key in the API response
-
-            if not isinstance(results_data, list):
-                return jsonify({'error': f'The root key "{root_key}" does not point to a list of data'}), 400
-
-            def get_nested_value(data, key_path):
-                """Recursively get a nested value from a dictionary or list given a dot-separated key path."""
-                keys = key_path.split('.')
-                for key in keys:
-                    if isinstance(data, dict) and key in data:
-                        data = data[key]
-                    elif isinstance(data, list):
-                        data = [get_nested_value(item, '.'.join(keys[1:])) for item in data]
-                        return data
-                    else:
-                        return None
-                return data
-            
-            # Dynamically extract data based on selected keys
-            extracted_data = []
-            for entry in results_data:
-                row = {}
-                for key in selected_keys:
-                    value = get_nested_value(entry, key)
-                    row[key] = value
-                extracted_data.append(row)
-
-            # Prepare a list of column names and corresponding data for each entry
-            columns = selected_keys
-            db_config = {
-                "dbname": "examples",
-                "user": "examples",
-                "password": "examples",
-                "host": "superset_db",  # Your PostgreSQL host
-            }
-
-            # Establish connection to PostgreSQL
-            conn = psycopg2.connect(**db_config)
-            cur = conn.cursor()
-
-            # Create table dynamically based on the selected keys (columns)
-            create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
-                {", ".join([f'"{col}" TEXT' for col in columns])}
-            );"""
-            cur.execute(create_table_query)
-
-            # Insert data into the table
-            for entry in extracted_data:
-                insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
-                VALUES ({", ".join(['%s' for _ in columns])});"""
-                cur.execute(insert_query, [str(entry.get(col, '')) for col in columns])
-
-            # Grant necessary permissions
-            grant_permissions_query = f"""GRANT SELECT ON TABLE {table_name} TO PUBLIC;"""
-            cur.execute(grant_permissions_query)
-            # Commit changes and close the connection
-            conn.commit()
-            cur.close()
-            conn.close()
-
-            return jsonify({"message": f"Data inserted into table '{table_name}' successfully!", "keys": selected_keys}), 200
-
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return jsonify({'error': str(e)}), 500
-
     def process_json_tree(self, data: dict) -> dict:
         """ Recursively build a tree-like structure from the JSON keys """
         def build_tree(d):
@@ -816,3 +729,90 @@ class SupersetIndexView(IndexView):
             return None
         
         return build_tree(data)
+
+    @expose("/api/upload", methods=["POST"])
+    def upload_data(self) -> FlaskResponse:
+        """
+        This function handles extracting rows based on the selected keys and logging them.
+        """
+        try:
+            # Extract data from the request body
+            body = request.get_json()
+            keys = body.get('keys', [])
+            url = body.get('url', '')
+            table_name = body.get('table_name', '')
+            print(f"Keys:{keys}")
+
+            if not keys or not url or not table_name:
+                return jsonify({'error': 'Missing keys, url, or table_name in the request body'}), 400
+
+            # Fetch data from the API
+            response = requests.get(url)
+            if response.status_code != 200:
+                return jsonify({'error': 'Failed to fetch data from the API'}), 500
+
+            api_data = response.json()
+            # Example selected keys
+            selected_keys = keys
+            split_keys = [key.split('.') for key in selected_keys]
+
+            # Process the results
+            rows = self.process_results(api_data, split_keys)
+
+            # For testing: print rows to logger
+            for row in rows:
+                #logger.info(f"Row: {row}")
+                print(f"Row: {row}")
+
+            # Placeholder for database insertion logic
+            # self.insert_rows_into_db(table_name, rows)
+
+            return jsonify({'message': f'Successfully extracted {len(rows)} rows'}), 200
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return jsonify({'error': str(e)}), 500
+
+    def process_results(self, data: dict, keys: list) -> list:
+        """Processes the 'Results' key in the JSON response."""
+
+        processed_rows = []
+        root_key = keys[0][0]
+
+        # Iterate over each object in 'root_key'
+        for index, result in enumerate(data[root_key]):
+            row = []
+            # For each set of split keys (e.g., ['Results', 'Country'], ['Results', 'VehicleTypes', 'Name'])
+            for key in keys:
+                # Remove the first element (root_key) and process the rest
+                value = self.extract_value(result, key[1:])
+                row.append(value)
+            processed_rows.append(row)
+
+        return processed_rows
+
+    def extract_value(self, entry: dict, key_parts: list):
+        """Recursive function to extract value from nested dictionary/list."""
+
+        if not key_parts:
+            return None
+
+        key = key_parts[0]
+        #print(f"[extract_value] Current key: {key}")
+
+        if isinstance(entry, list):
+            #print("[extract_value] Data is a list, iterating over each item...")
+            result = []
+            for item in entry:
+                value = self.extract_value(item, key_parts)
+                result.append(value)
+            return result
+
+        elif isinstance(entry, dict):
+            #print(f"[extract_value] Data is a dict. Checking if key '{key}' is present in data...")
+            if key in entry:
+                return self.extract_value(entry[key], key_parts[1:]) if len(key_parts) > 1 else entry[key]
+            else:
+                print(f"[extract_value] Key '{key}' not found.")
+                #print("[extract_value] Returning None (key not found or data is not a dict/list)")
+                return None

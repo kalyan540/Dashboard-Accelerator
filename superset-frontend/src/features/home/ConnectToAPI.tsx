@@ -63,6 +63,7 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
       // Handle the response
       const result = response.json; // Adjusted to correctly access the JSON response
       console.log('Uploaded keys:', result);
+      setSelectedKeys([]);
     } catch (err) {
       console.error('Error uploading keys:', err);
     }
@@ -105,6 +106,17 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
     });
   };
 
+  // Function to clear all variables
+  const handleClose = () => {
+    setUrl('');           // Clear the URL field
+    setTableName('');      // Clear the table name field
+    setJsonData(null);     // Clear the fetched JSON data
+    setSelectedKeys([]);   // Clear selected keys
+    setError(null);        // Clear any error message
+    setLoading(false);     // Reset loading state
+    onHide();              // Call the parent onHide function
+  };
+
   if (!show) {
     return null;
   }
@@ -114,7 +126,7 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
       <div className="popup-content" style={{ width: '500px' }}>
         <div className="popup-header">
           <h2>Connect to API</h2>
-          <button className="close-button" onClick={onHide}>X</button>
+          <button className="close-button" onClick={handleClose}>X</button>
         </div>
         <div className="popup-body">
           <div className="url-input">
