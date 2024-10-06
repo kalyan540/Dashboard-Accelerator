@@ -21,10 +21,12 @@ import logging
 import os
 import sys
 from typing import Any, Callable, TYPE_CHECKING
+import requests
+import psycopg2
 
 import wtforms_json
 from deprecation import deprecated
-from flask import Flask, redirect
+from flask import Flask, redirect, jsonify, request
 from flask_appbuilder import expose, IndexView
 from flask_babel import gettext as __
 from flask_compress import Compress
@@ -696,3 +698,121 @@ class SupersetIndexView(IndexView):
     @expose("/")
     def index(self) -> FlaskResponse:
         return redirect("/superset/welcome/")
+
+    @expose("/api/preview")
+    def get_preview(self) -> FlaskResponse:
+        try:
+            url = request.args.get('url')  # Get URL from frontend
+            if not url:
+                return jsonify({'error': 'No URL provided'}), 400
+
+            # Fetch data from the provided API
+            response = requests.get(url)
+            data = response.json()  # Parse the JSON response
+
+            # Process the JSON to create a tree-like structure
+            tree_data = self.process_json_tree(data)
+            return jsonify(tree_data)  # Return tree-structured data
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return jsonify({'error': str(e)}), 500
+
+    @expose("/api/upload", methods=["POST"])
+    def upload_keys(self) -> FlaskResponse:
+        try:
+            data = request.json
+            selected_keys = data.get('keys', [])
+            url = data.get('url')
+            table_name = data.get('table_name')
+            
+            if not url or not table_name:
+                return jsonify({'error': 'URL and table name are required'}), 400
+
+            logger.info(selected_keys)
+            response = requests.get(url)
+            api_data = response.json()
+
+            # Determine the root of the data by using the first selected key's root
+            first_key = selected_keys[0] if selected_keys else None
+            if not first_key:
+                return jsonify({'error': 'No keys selected'}), 400
+            
+            root_key = first_key.split('.')[0]  # Get the root key from the first key
+            results_data = api_data.get(root_key, [])  # Dynamically access the root key in the API response
+
+            if not isinstance(results_data, list):
+                return jsonify({'error': f'The root key "{root_key}" does not point to a list of data'}), 400
+
+            def get_nested_value(data, key_path):
+                """Recursively get a nested value from a dictionary or list given a dot-separated key path."""
+                keys = key_path.split('.')
+                for key in keys:
+                    if isinstance(data, dict) and key in data:
+                        data = data[key]
+                    elif isinstance(data, list):
+                        data = [get_nested_value(item, '.'.join(keys[1:])) for item in data]
+                        return data
+                    else:
+                        return None
+                return data
+            
+            # Dynamically extract data based on selected keys
+            extracted_data = []
+            for entry in results_data:
+                row = {}
+                for key in selected_keys:
+                    value = get_nested_value(entry, key)
+                    row[key] = value
+                extracted_data.append(row)
+
+            # Prepare a list of column names and corresponding data for each entry
+            columns = selected_keys
+            db_config = {
+                "dbname": "examples",
+                "user": "examples",
+                "password": "examples",
+                "host": "superset_db",  # Your PostgreSQL host
+            }
+
+            # Establish connection to PostgreSQL
+            conn = psycopg2.connect(**db_config)
+            cur = conn.cursor()
+
+            # Create table dynamically based on the selected keys (columns)
+            create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
+                {", ".join([f'"{col}" TEXT' for col in columns])}
+            );"""
+            cur.execute(create_table_query)
+
+            # Insert data into the table
+            for entry in extracted_data:
+                insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
+                VALUES ({", ".join(['%s' for _ in columns])});"""
+                cur.execute(insert_query, [str(entry.get(col, '')) for col in columns])
+
+            # Grant necessary permissions
+            grant_permissions_query = f"""GRANT SELECT ON TABLE {table_name} TO PUBLIC;"""
+            cur.execute(grant_permissions_query)
+            # Commit changes and close the connection
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            return jsonify({"message": f"Data inserted into table '{table_name}' successfully!", "keys": selected_keys}), 200
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return jsonify({'error': str(e)}), 500
+
+    def process_json_tree(self, data: dict) -> dict:
+        """ Recursively build a tree-like structure from the JSON keys """
+        def build_tree(d):
+            if isinstance(d, list):
+                if d and isinstance(d[0], dict):
+                    return {key: build_tree(value) for key, value in d[0].items()}
+                return None
+            elif isinstance(d, dict):
+                return {key: build_tree(value) for key, value in d.items()}
+            return None
+        
+        return build_tree(data)

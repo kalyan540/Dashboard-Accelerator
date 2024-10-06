@@ -109,6 +109,10 @@ function AlertList({
   user,
   addSuccessToast,
 }: AlertListProps) {
+  //console.log(addDangerToast);
+  //console.log(isReportEnabled);
+  //console.log(user);
+  //console.log(addSuccessToast);
   const title = isReportEnabled ? t('Report') : t('Alert');
   const titlePlural = isReportEnabled ? t('reports') : t('alerts');
   const pathName = isReportEnabled ? 'Reports' : 'Alerts';
@@ -528,7 +532,7 @@ function AlertList({
       <SubMenu
         activeChild={pathName}
         name={header}
-        tabs={[
+        /*tabs={[
           {
             name: 'Alerts',
             label: t('Alerts'),
@@ -544,7 +548,7 @@ function AlertList({
             'data-test': 'report-list',
           },
         ]}
-        buttons={subMenuButtons}
+        buttons={subMenuButtons}*/
       >
         <RefreshContainer>
           <LastUpdated updatedAt={lastFetched} update={() => refreshData()} />
@@ -563,6 +567,7 @@ function AlertList({
         isReport={isReportEnabled}
         key={currentAlert?.id || generateKey()}
       />
+      {console.log(alertModalOpen,isReportEnabled, alertModalOpen)}
       {currentAlertDeleting && (
         <DeleteModal
           description={t(

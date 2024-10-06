@@ -56,6 +56,8 @@ import {
   RightMenuProps,
 } from './types';
 
+import ConnectToAPI from './ConnectToAPI';
+
 const extensionsRegistry = getExtensionsRegistry();
 
 const versionInfoStyles = (theme: SupersetTheme) => css`
@@ -145,6 +147,7 @@ const RightMenu = ({
     HAS_GSHEETS_INSTALLED,
   } = useSelector<any, ExtensionConfigs>(state => state.common.conf);
   const [showDatabaseModal, setShowDatabaseModal] = useState<boolean>(false);
+  const [showAPIModal, setShowAPIModal] = useState<boolean>(false);
   const [showCSVUploadModal, setShowCSVUploadModal] = useState<boolean>(false);
   const [showExcelUploadModal, setShowExcelUploadModal] =
     useState<boolean>(false);
@@ -155,6 +158,7 @@ const RightMenu = ({
   const canDashboard = findPermission('can_write', 'Dashboard', roles);
   const canChart = findPermission('can_write', 'Chart', roles);
   const canDatabase = findPermission('can_write', 'Database', roles);
+  const canAPIDatabase = true
   const canDataset = findPermission('can_write', 'Dataset', roles);
 
   const { canUploadData, canUploadCSV, canUploadColumnar, canUploadExcel } =
@@ -180,6 +184,11 @@ const RightMenu = ({
         {
           label: t('Connect database'),
           name: GlobalMenuDataOptions.DbConnection,
+          perm: canDatabase && !nonExamplesDBConnected,
+        },
+        {
+          label: t('Connect API to database'),
+          name: GlobalMenuDataOptions.APIConnection,
           perm: canDatabase && !nonExamplesDBConnected,
         },
         {
@@ -290,7 +299,10 @@ const RightMenu = ({
   const handleMenuSelection = (itemChose: any) => {
     if (itemChose.key === GlobalMenuDataOptions.DbConnection) {
       setShowDatabaseModal(true);
-    } else if (itemChose.key === GlobalMenuDataOptions.GoogleSheets) {
+    } else if (itemChose.key === GlobalMenuDataOptions.APIConnection) {
+      setShowAPIModal(true);
+    }
+    else if (itemChose.key === GlobalMenuDataOptions.GoogleSheets) {
       setShowDatabaseModal(true);
       setEngine('Google Sheets');
     } else if (itemChose.key === GlobalMenuDataOptions.CSVUpload) {
@@ -312,8 +324,9 @@ const RightMenu = ({
   );
 
   const buildMenuItem = (item: MenuObjectChildProps) =>
+    
     item.disable ? (
-      <Menu.Item key={item.name} css={styledDisabled} disabled>
+      <Menu.Item key={item.name} css={styledDisabled}>
         <Tooltip placement="top" title={tooltipText}>
           {item.label}
         </Tooltip>
@@ -323,6 +336,7 @@ const RightMenu = ({
         {item.url ? <a href={item.url}> {item.label} </a> : item.label}
       </Menu.Item>
     );
+    
 
   const onMenuOpen = (openKeys: string[]) => {
     // We should query the API only if opening Data submenus
@@ -353,6 +367,7 @@ const RightMenu = ({
   };
 
   const theme = useTheme();
+  //console.log(navbarRight);
 
   return (
     <StyledDiv align={align}>
@@ -363,6 +378,12 @@ const RightMenu = ({
           dbEngine={engine}
           onDatabaseAdd={handleDatabaseAdd}
         />
+      )}
+      {canAPIDatabase && (
+        <ConnectToAPI
+        onHide={() => setShowAPIModal(false)}
+        show={showAPIModal}
+      />
       )}
       {canUploadCSV && (
         <UploadDataModal
@@ -423,6 +444,8 @@ const RightMenu = ({
               );
               if (menu.childs) {
                 if (canShowChild) {
+                  //console.log(menu);
+                  
                   return (
                     <SubMenu
                       key={`sub2_${menu.label}`}
@@ -432,7 +455,8 @@ const RightMenu = ({
                       {menu?.childs?.map?.((item, idx) =>
                         typeof item !== 'string' && item.name && item.perm ? (
                           <Fragment key={item.name}>
-                            {idx === 3 && <Menu.Divider />}
+                            
+                            {idx === 4 && <Menu.Divider />}
                             {buildMenuItem(item)}
                           </Fragment>
                         ) : null,
@@ -509,6 +533,7 @@ const RightMenu = ({
           ])}
 
           {!navbarRight.user_is_anonymous && [
+            
             <Menu.Divider key="user-divider" />,
             <Menu.ItemGroup key="user-section" title={t('User')}>
               {navbarRight.user_info_url && (

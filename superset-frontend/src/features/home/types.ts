@@ -50,6 +50,7 @@ export interface RightMenuProps {
 export enum GlobalMenuDataOptions {
   GoogleSheets = 'gsheets',
   DbConnection = 'dbconnection',
+  APIConnection = 'apiConnection',
   DatasetCreation = 'datasetCreation',
   CSVUpload = 'csvUpload',
   ExcelUpload = 'excelUpload',

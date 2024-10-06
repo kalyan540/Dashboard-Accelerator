@@ -135,9 +135,12 @@ export default function AddDataset() {
       datasets={datasetNames}
     />
   );
-
+  console.log(dataset);
+  console.log(hasColumns);
+  console.log(datasetNames);
   return (
     <DatasetLayout
+    
       header={HeaderComponent()}
       leftPanel={editPageIsVisible ? null : LeftPanelComponent()}
       datasetPanel={
