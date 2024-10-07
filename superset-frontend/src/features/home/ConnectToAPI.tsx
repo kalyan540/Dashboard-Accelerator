@@ -1,6 +1,12 @@
 import React, { useState, FunctionComponent } from 'react';
 import './ConnectToAPI.css'; // Assuming you have a CSS file for styling
 import { SupersetClient } from '@superset-ui/core';
+/*import { logEvent } from 'src/logger/actions';
+import {
+  LOG_ACTIONS_DATASET_CREATION_SUCCESS,
+} from 'src/logger/LogUtils';
+import { useSingleViewResource } from 'src/views/CRUD/hooks';
+import { t } from '@superset-ui/core';*/
 
 interface ConnectToAPIProps {
   onHide: () => void;
@@ -64,6 +70,7 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
       const result = response.json; // Adjusted to correctly access the JSON response
       console.log('Uploaded keys:', result);
       setSelectedKeys([]);
+      
     } catch (err) {
       console.error('Error uploading keys:', err);
     }
@@ -116,6 +123,33 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
     setLoading(false);     // Reset loading state
     onHide();              // Call the parent onHide function
   };
+
+  /*const { createResource } = useSingleViewResource<Partial<DatasetObject>>(
+    'dataset',
+    t('dataset')
+  );
+
+  const onSave = () => {
+    if (datasetObject) {
+      console.log("Iam hear at Footer");
+      console.log(datasetObject);
+      const data = {
+        database: datasetObject.db?.id,
+        catalog: datasetObject.catalog,
+        schema: datasetObject.schema,
+        table_name: datasetObject.table_name,
+      };
+      createResource(data).then(response => {
+        if (!response) {
+          return;
+        }
+        if (typeof response === 'number') {
+          logEvent(LOG_ACTIONS_DATASET_CREATION_SUCCESS, datasetObject);
+          console.log("Dataset added");
+        }
+      });
+    }
+  };*/
 
   if (!show) {
     return null;

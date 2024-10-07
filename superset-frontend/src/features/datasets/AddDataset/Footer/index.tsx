@@ -87,6 +87,8 @@ function Footer({
 
   const onSave = () => {
     if (datasetObject) {
+      console.log("Iam hear at Footer");
+      console.log(datasetObject);
       const data = {
         database: datasetObject.db?.id,
         catalog: datasetObject.catalog,

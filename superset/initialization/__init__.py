@@ -712,6 +712,7 @@ class SupersetIndexView(IndexView):
 
             # Process the JSON to create a tree-like structure
             tree_data = self.process_json_tree(data)
+            print(tree_data)
             return jsonify(tree_data)  # Return tree-structured data
         except Exception as e:
             print(f"Error occurred: {e}")
@@ -735,6 +736,14 @@ class SupersetIndexView(IndexView):
         """
         This function handles extracting rows based on the selected keys and logging them.
         """
+        db_config = {
+            "dbname": "examples",
+            "user": "superset",
+            "password": "superset",
+            "host": "superset_db",  # Your PostgreSQL host
+            "port": "5432"
+        }
+
         try:
             # Extract data from the request body
             body = request.get_json()
@@ -755,10 +764,30 @@ class SupersetIndexView(IndexView):
             # Example selected keys
             selected_keys = keys
             split_keys = [key.split('.') for key in selected_keys]
+            columns = [split_key[-1] for split_key in split_keys]
 
             # Process the results
             rows = self.process_results(api_data, split_keys)
 
+            conn = psycopg2.connect(**db_config)
+            cur = conn.cursor()
+            # Create table dynamically based on the columns from the API response
+            create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
+                {", ".join([f'"{col}" TEXT' for col in columns])}
+            );"""
+            cur.execute(create_table_query)
+
+            for entry in rows:
+                insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
+                VALUES ({", ".join(['%s' for _ in columns])});"""
+                cur.execute(insert_query, entry)
+            # Grant necessary permissions to the user 'admin'
+            grant_permissions_query = f"""GRANT SELECT ON TABLE examples.public.{table_name} TO PUBLIC;"""
+            cur.execute(grant_permissions_query)
+
+            conn.commit()
+            cur.close()
+            conn.close()
             # For testing: print rows to logger
             for row in rows:
                 #logger.info(f"Row: {row}")
@@ -767,8 +796,10 @@ class SupersetIndexView(IndexView):
             # Placeholder for database insertion logic
             # self.insert_rows_into_db(table_name, rows)
 
-            return jsonify({'message': f'Successfully extracted {len(rows)} rows'}), 200
-
+            return jsonify({
+                'message': f'Successfully extracted {len(rows)} rows',
+                'columns': columns  # Return columns
+            }), 200
         except Exception as e:
             print(f"Error occurred: {e}")
             return jsonify({'error': str(e)}), 500
