@@ -1,19 +1,21 @@
 import React, { useState, FunctionComponent } from 'react';
+import { useHistory } from 'react-router-dom';
 import './ConnectToAPI.css'; // Assuming you have a CSS file for styling
 import { SupersetClient } from '@superset-ui/core';
-/*import { logEvent } from 'src/logger/actions';
+import { logEvent } from 'src/logger/actions';
 import {
   LOG_ACTIONS_DATASET_CREATION_SUCCESS,
 } from 'src/logger/LogUtils';
 import { useSingleViewResource } from 'src/views/CRUD/hooks';
-import { t } from '@superset-ui/core';*/
-
+import { t } from '@superset-ui/core';
+import { DatasetObject } from './types';
 interface ConnectToAPIProps {
   onHide: () => void;
   show: boolean;
 }
 
 const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) => {
+  const history = useHistory();
   const [url, setUrl] = useState('');
   const [tableName, setTableName] = useState('');
   const [jsonData, setJsonData] = useState<Record<string, any> | null>(null);
@@ -59,18 +61,19 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
         url: url, // Replace with your actual API URL
         table_name: tableName // Replace with your desired table name
       };
-  
+
       // Make the POST request to upload data
       const response = await SupersetClient.post({
         endpoint: '/api/upload',
         jsonPayload: payload,
       });
-  
+
       // Handle the response
       const result = response.json; // Adjusted to correctly access the JSON response
+      onSave();
       console.log('Uploaded keys:', result);
       setSelectedKeys([]);
-      
+
     } catch (err) {
       console.error('Error uploading keys:', err);
     }
@@ -124,32 +127,32 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
     onHide();              // Call the parent onHide function
   };
 
-  /*const { createResource } = useSingleViewResource<Partial<DatasetObject>>(
+  const { createResource } = useSingleViewResource<Partial<DatasetObject>>(
     'dataset',
-    t('dataset')
+    t('dataset'),
+    (errorMsg: string) => { console.error(`Error: ${errorMsg}`); }
   );
 
   const onSave = () => {
-    if (datasetObject) {
-      console.log("Iam hear at Footer");
-      console.log(datasetObject);
-      const data = {
-        database: datasetObject.db?.id,
-        catalog: datasetObject.catalog,
-        schema: datasetObject.schema,
-        table_name: datasetObject.table_name,
-      };
-      createResource(data).then(response => {
-        if (!response) {
-          return;
-        }
-        if (typeof response === 'number') {
-          logEvent(LOG_ACTIONS_DATASET_CREATION_SUCCESS, datasetObject);
-          console.log("Dataset added");
-        }
-      });
-    }
-  };*/
+    const data = {
+      database: 1,
+      catalog: null,
+      schema: "public",
+      table_name: tableName,
+    };
+    console.log("Iam hear at Footer");
+    createResource(data).then(response => {
+      if (!response) {
+        return;
+      }
+      if (typeof response === 'number') {
+        logEvent(LOG_ACTIONS_DATASET_CREATION_SUCCESS, data);
+        console.log("Dataset added");
+        onHide();
+        history.push(`/chart/add/?dataset=${tableName}`);
+      }
+    });
+  };
 
   if (!show) {
     return null;

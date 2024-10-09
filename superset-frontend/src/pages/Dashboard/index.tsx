@@ -81,7 +81,7 @@ const DashboardRoute: FC = () => {
             className={`button ${activeButton === 'Reports' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Reports')}
           >
-            <img src="/static/assets/images/Alerts.png" alt="Icon" className="icon" />
+            <img src="/static/assets/images/Reports.png" alt="Icon" className="icon" />
             Reports
           </button>
         </div>

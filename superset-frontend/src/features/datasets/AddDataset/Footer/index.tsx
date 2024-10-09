@@ -96,6 +96,7 @@ function Footer({
         table_name: datasetObject.table_name,
       };
       createResource(data).then(response => {
+        console.log(data);
         if (!response) {
           return;
         }
