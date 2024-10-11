@@ -518,20 +518,38 @@ function AlertList({
     [],
   );
 
-  const header = HeaderExtension ? (
+  /*const header = HeaderExtension ? (
     <StyledHeaderWithIcon>
       <div>{t('Alerts & reports')}</div>
       <HeaderExtension />
     </StyledHeaderWithIcon>
   ) : (
     t('Alerts & reports')
+  );*/
+
+  const Alert_header = HeaderExtension ? (
+    <StyledHeaderWithIcon>
+      <div>{t('Alerts')}</div>
+      <HeaderExtension />
+    </StyledHeaderWithIcon>
+  ) : (
+    t('Alerts')
+  );
+
+  const Report_header = HeaderExtension ? (
+    <StyledHeaderWithIcon>
+      <div>{t('Reports')}</div>
+      <HeaderExtension />
+    </StyledHeaderWithIcon>
+  ) : (
+    t('Reports')
   );
 
   return (
     <>
       <SubMenu
         activeChild={pathName}
-        name={header}
+        name={isReportEnabled ? Report_header : Alert_header}
         /*tabs={[
           {
             name: 'Alerts',
@@ -547,8 +565,8 @@ function AlertList({
             usesRouter: true,
             'data-test': 'report-list',
           },
-        ]}
-        buttons={subMenuButtons}*/
+        ]}*/
+        buttons={subMenuButtons}
       >
         <RefreshContainer>
           <LastUpdated updatedAt={lastFetched} update={() => refreshData()} />

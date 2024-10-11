@@ -133,3 +133,15 @@ def prune_query() -> None:
         ).run()
     except CommandException as ex:
         logger.exception("An error occurred while pruning queries: %s", ex)
+
+@celery_app.task(name="api.scheduler")
+def api_scheduler() -> None:
+    stats_logger: BaseStatsLogger = app.config["STATS_LOGGER"]
+    stats_logger.incr("api.scheduler")
+
+    try:
+        print("Iam Here API Scheduler")
+    except SoftTimeLimitExceeded as ex:
+        logger.warning("A timeout occurred while api schedule logs: %s", ex)
+    except CommandException:
+        logger.exception("An exception occurred while api schedule logs")

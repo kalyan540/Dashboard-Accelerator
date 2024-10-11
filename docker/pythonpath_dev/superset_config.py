@@ -99,6 +99,10 @@ class CeleryConfig:
             "task": "reports.prune_log",
             "schedule": crontab(minute=10, hour=0),
         },
+        "api.scheduler": {
+            "task": "api.scheduler",
+            "schedule": crontab(minute="*", hour="*"),
+        },
     }
 
 
