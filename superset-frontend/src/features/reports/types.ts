@@ -20,7 +20,7 @@
 /**
  * Types mirroring enums in `superset/reports/models.py`:
  */
-export type ReportScheduleType = 'Alert' | 'Report';
+export type ReportScheduleType = 'Alert' | 'Report' | 'API Scheduler';
 export type ReportCreationMethod = 'charts' | 'dashboards' | 'alerts_reports';
 
 export type ReportRecipientType = 'Email' | 'Slack';
@@ -40,7 +40,7 @@ export interface ReportObject {
   active: boolean;
   crontab: string;
   dashboard?: number;
-  chart?: number;
+  chart?: number | null;
   description?: string;
   log_retention: number;
   name: string;
