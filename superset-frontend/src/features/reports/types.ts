@@ -20,7 +20,7 @@
 /**
  * Types mirroring enums in `superset/reports/models.py`:
  */
-export type ReportScheduleType = 'Alert' | 'Report' | 'API Scheduler';
+export type ReportScheduleType = 'Alert' | 'Report';
 export type ReportCreationMethod = 'charts' | 'dashboards' | 'alerts_reports';
 
 export type ReportRecipientType = 'Email' | 'Slack';

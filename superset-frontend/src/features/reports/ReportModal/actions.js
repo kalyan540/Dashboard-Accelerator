@@ -101,7 +101,7 @@ const structureFetchAction = (dispatch, getState) => {
 
 export const ADD_REPORT = 'ADD_REPORT';
 
-export const addReport = report => dispatch =>
+export const addReport = report => dispatch =>{
   console.log(report);
   SupersetClient.post({
     endpoint: `/api/v1/report/`,
@@ -110,6 +110,7 @@ export const addReport = report => dispatch =>
     dispatch({ type: ADD_REPORT, json });
     dispatch(addSuccessToast(t('The report has been created')));
   });
+};
 
 export const EDIT_REPORT = 'EDIT_REPORT';
 

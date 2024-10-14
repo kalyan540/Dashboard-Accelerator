@@ -67,7 +67,7 @@ const ConnectToAPI: FunctionComponent<ConnectToAPIProps> = ({ onHide, show }) =>
           type: 'Email',
         },
       ],
-      name: "World population fetch",
+      name: "World fetch",
       description: "API Configuration for scheduling",
       crontab: "0 0 * * *",
       report_format: "PNG",
