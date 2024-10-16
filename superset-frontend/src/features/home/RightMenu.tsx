@@ -56,7 +56,7 @@ import {
   RightMenuProps,
 } from './types';
 
-import ConnectToAPI from './ConnectToAPI';
+import APIModal from './ConnectToAPI2';
 
 const extensionsRegistry = getExtensionsRegistry();
 
@@ -380,7 +380,7 @@ const RightMenu = ({
         />
       )}
       {canAPIDatabase && (
-        <ConnectToAPI
+        <APIModal
         onHide={() => setShowAPIModal(false)}
         show={showAPIModal}
       />

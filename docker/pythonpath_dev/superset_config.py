@@ -117,6 +117,9 @@ SMTP_PORT = 465 # your port, e.g. 587
 SMTP_STARTTLS = False
 SMTP_SSL_SERVER_AUTH = False # If your using an SMTP server with a valid certificate
 SMTP_SSL = True
+SMTP_USER = "kalyanroczzzz@gmail.com" # use the empty string "" if using an unauthenticated SMTP server
+SMTP_PASSWORD = "bhjxlxvwcylsqaxp" # use the empty string "" if using an unauthenticated SMTP server
+SMTP_MAIL_FROM = "kalyanroczzzz@gmail.com"
 EMAIL_REPORTS_SUBJECT_PREFIX = "[Superset] " # optional - overwrites default value in config.py of "[Report] "
 
 # WebDriver configuration

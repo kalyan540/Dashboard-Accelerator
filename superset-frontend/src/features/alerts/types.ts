@@ -102,6 +102,9 @@ export type Operator = '<' | '>' | '<=' | '>=' | '==' | '!=' | 'not null';
 
 export type AlertObject = {
   active?: boolean;
+  url: string;
+  databasename: string;
+  tablename: string;
   creation_method?: string;
   chart?: MetaObject;
   changed_by?: user;
