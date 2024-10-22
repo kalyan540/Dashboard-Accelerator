@@ -23,6 +23,7 @@ import './Buttons.css';
 import AlertList from '../AlertReportList';
 import Analytics from './Analytics';
 import UserManagement from './usermanagement';
+import Bioreactor from './bioreactor';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
@@ -69,6 +70,13 @@ const DashboardRoute: FC = () => {
           >
             <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
             Assert Model
+          </button>
+          <button
+            className={`button ${activeButton === 'Bioreactor' ? 'active' : ''}`}
+            onClick={() => handleButtonClick('Bioreactor')}
+          >
+            <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
+            Bioreactor
           </button>
           <button
             className={`button ${activeButton === 'Alerts' ? 'active' : ''}`}
@@ -133,6 +141,9 @@ const DashboardRoute: FC = () => {
           <div>
             <h2>This Asset Model page is in development.</h2>
           </div>
+        )
+        : activeButton === 'Bioreactor' ? (
+          <Bioreactor/>
         ) : activeButton === 'Analytics' ? (
           <Analytics />
         ) : (

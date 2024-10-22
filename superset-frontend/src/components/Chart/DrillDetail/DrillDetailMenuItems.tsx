@@ -30,6 +30,7 @@ import {
   styled,
   t,
 } from '@superset-ui/core';
+import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Menu } from 'src/components/Menu';
 import { RootState } from 'src/dashboard/types';
@@ -40,6 +41,7 @@ import { MenuItemWithTruncation } from '../MenuItemWithTruncation';
 
 const DRILL_TO_DETAIL = t('Drill to detail');
 const DRILL_TO_DETAIL_BY = t('Drill to detail by');
+const DRILL_TO_DETAIL_CUSTOM = t('Drill to detail custom');
 const DISABLED_REASONS = {
   DATABASE: t(
     'Drill to detail is disabled for this database. Change the database settings to enable it.',
@@ -117,6 +119,7 @@ const DrillDetailMenuItems = ({
   drillToDetailMenuRef,
   ...props
 }: DrillDetailMenuItemsProps) => {
+  const history = useHistory();
   const drillToDetailDisabled = useSelector<RootState, boolean | undefined>(
     ({ datasources }) =>
       datasources[formData.datasource]?.database?.disable_drill_to_detail,
@@ -125,6 +128,13 @@ const DrillDetailMenuItems = ({
   const [modalFilters, setFilters] = useState<BinaryQueryObjectFilterClause[]>(
     [],
   );
+
+  // Function to navigate to DashboardPage with idOrSlug=13
+  const navigateToDashboard = useCallback((event) => {
+    onClick(event); // Trigger the original onClick logic if needed
+    onSelection(); // Call the selection logic if any
+    history.push('13'); // Navigate to DashboardPage with idOrSlug=13
+  }, [onClick, onSelection, history]);
 
   const openModal = useCallback(
     (filters, event) => {
@@ -202,6 +212,36 @@ const DrillDetailMenuItems = ({
     </Menu.Item>
   );
 
+  const drillToDetailCustomByMenuItem = drillByDisabled ? (
+    <DisabledMenuItem {...props} key="drill-to-detail-by-disabled">
+      {DRILL_TO_DETAIL_CUSTOM}
+      <MenuItemTooltip title={drillByDisabled} />
+    </DisabledMenuItem>
+  ) : (
+    <Menu.SubMenu
+      {...props}
+      popupOffset={[0, submenuYOffset]}
+      popupClassName="chart-context-submenu"
+      title={DRILL_TO_DETAIL_CUSTOM}
+    >
+      <div data-test="drill-to-detail-by-custom-submenu">
+      {filters.map((filter, i) => (
+          <Menu.Item
+            {...props}
+            key={`drill-detail-filter-${i}`}
+            onClick={navigateToDashboard}
+          >
+            <div>
+              {`${DRILL_TO_DETAIL_CUSTOM}:${filter.formattedVal} `}
+              <StyledFilter stripHTML={false}>{t('all')}</StyledFilter>
+            </div>
+          </Menu.Item>
+        ))}
+      </div>
+    </Menu.SubMenu>
+  );
+
+
   const drillToDetailByMenuItem = drillByDisabled ? (
     <DisabledMenuItem {...props} key="drill-to-detail-by-disabled">
       {DRILL_TO_DETAIL_BY}
@@ -246,6 +286,7 @@ const DrillDetailMenuItems = ({
     <>
       {drillToDetailMenuItem}
       {isContextMenu && drillToDetailByMenuItem}
+      {isContextMenu && drillToDetailCustomByMenuItem}
       <DrillDetailModal
         chartId={chartId}
         formData={formData}

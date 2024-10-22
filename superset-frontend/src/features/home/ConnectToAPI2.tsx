@@ -21,6 +21,7 @@ import React, {
     FunctionComponent,
     useState,
     useEffect,
+    useCallback,
     ReactNode,
     useMemo,
 } from 'react';
@@ -38,7 +39,7 @@ import {
 } from 'src/logger/LogUtils';
 import {
     addReport
-  } from 'src/features/reports/ReportModal/actions';
+} from 'src/features/reports/ReportModal/actions';
 import { Switch } from 'src/components/Switch';
 import Modal from 'src/components/Modal';
 import Collapse from 'src/components/Collapse';
@@ -54,7 +55,8 @@ import {
     AlertsReportsConfig,
     ValidationObject,
     Sections,
-    SelectValue
+    SelectValue,
+    MetaObject,
 } from 'src/features/alerts/types';
 import { useSelector } from 'react-redux';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
@@ -67,7 +69,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
     ReportObject
-  } from 'src/features/reports/types';
+} from 'src/features/reports/types';
 
 const TIMEOUT_MIN = 1;
 
@@ -316,14 +318,19 @@ const APIModal: FunctionComponent<APIModalProps> = ({
     // API configuration
     const history = useHistory();
     const [url, setUrl] = useState('');
+    const [active, setactive] = useState<boolean>(false);
+    const [crontab, setcrontab] = useState('');
+    //const [log_retention, setlogretention] = useState('');
+    const [timezone, settimezone] = useState('');
     const [tableName, setTableName] = useState('');
+    //const [scheduleName, setscheduleName] = useState('');
     const [jsonData, setJsonData] = useState<Record<string, any> | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
     //const [authType, setAuthType] = useState('no-auth'); // Default to 'No Auth'
     const dispatch = useDispatch();
-
+    const [sourceOptions, setSourceOptions] = useState<MetaObject[]>([]);
     const { createResource } = useSingleViewResource<Partial<DatasetObject>>(
         'dataset',
         t('dataset'),
@@ -337,6 +344,10 @@ const APIModal: FunctionComponent<APIModalProps> = ({
     const handleTableNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTableName(e.target.value);
     };
+
+    /*const handlescheduleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setscheduleName(e.target.value);
+    };*/
 
     /*const handleAuthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAuthType(e.target.value);
@@ -359,7 +370,10 @@ const APIModal: FunctionComponent<APIModalProps> = ({
 
             // Handle the response
             const result = response.json; // Adjusted to correctly access the JSON response
-            onSaveSchedule();
+            if(active){
+                onSaveSchedule();
+            }
+            
             Save();
             console.log('Uploaded keys:', result);
             setSelectedKeys([]);
@@ -381,6 +395,38 @@ const APIModal: FunctionComponent<APIModalProps> = ({
 
     const isEditMode = false;
 
+    
+
+    const getSourceData = useCallback(
+        (db?: MetaObject) => {
+            const database = db || currentAlert?.database;
+
+            if (!database || database.label) {
+                return null;
+            }
+
+            let result;
+
+            // Cycle through source options to find the selected option
+            sourceOptions.forEach(source => {
+                if (source.value === database.value || source.value === database.id) {
+                    result = source;
+                }
+            });
+
+            return result;
+        },
+        [currentAlert?.database, sourceOptions],
+    );
+
+    const databaseLabel = currentAlert?.database && !currentAlert.database.label;
+    useEffect(() => {
+        // Find source if current alert has one set
+        if (databaseLabel) {
+            updateAlertState('database', getSourceData());
+        }
+    }, [databaseLabel, getSourceData]);
+
     const {
         ALERT_REPORTS_DEFAULT_WORKING_TIMEOUT,
         ALERT_REPORTS_DEFAULT_CRON_VALUE,
@@ -398,7 +444,7 @@ const APIModal: FunctionComponent<APIModalProps> = ({
     });
 
     const defaultAlert = {
-        active: true,
+        active: false,
         url: '',
         databasename: '',
         tablename: '',
@@ -424,6 +470,15 @@ const APIModal: FunctionComponent<APIModalProps> = ({
             ...currentAlertData,
             [name]: value,
         }));
+        if (name === 'active') {
+            setactive(value);
+        }
+        if (name === 'crontab') {
+            setcrontab(value);
+        }
+        if (name === 'timezone') {
+            settimezone(value);
+        }
     };
 
     useEffect(() => {
@@ -451,10 +506,9 @@ const APIModal: FunctionComponent<APIModalProps> = ({
 
         updateAlertState(name, parsedValue);
 
-        if (name === 'name') {
-            //updateEmailSubject();
-            console.log("");
-        }
+        /*if (name === 'name') {
+            handlescheduleNameChange(event as React.ChangeEvent<HTMLInputElement>);
+        }*/
         if (name === 'url') {
             handleUrlChange(event as React.ChangeEvent<HTMLInputElement>);  // Ensure the event is passed to handleUrlChange
         }
@@ -484,12 +538,17 @@ const APIModal: FunctionComponent<APIModalProps> = ({
         updateAlertState('owners', value || []);
     };
 
+    const onSourceChange = (value: Array<SelectValue>) => {
+        updateAlertState('database', value || []);
+    };
+
     const onActiveSwitch = (checked: boolean) => {
         updateAlertState('active', checked);
     };
 
     const onLogRetentionChange = (retention: number) => {
         updateAlertState('log_retention', retention);
+        //setlogretention(retention);
     };
 
     const onTimezoneChange = (timezone: string) => {
@@ -510,6 +569,7 @@ const APIModal: FunctionComponent<APIModalProps> = ({
         setLoading(false);
         onHide(); // Ensure this prop is passed properly from parent
         setCurrentAlert({ ...defaultAlert });
+        //setactive(false);
     };
 
     const Save = () => {
@@ -534,6 +594,30 @@ const APIModal: FunctionComponent<APIModalProps> = ({
         });
 
     };
+
+    const loadSourceOptions = useMemo(
+        () =>
+            (input = '', page: number, pageSize: number) => {
+                const query = rison.encode({
+                    filter: input,
+                    page,
+                    page_size: pageSize,
+                });
+                return SupersetClient.get({
+                    endpoint: `/api/v1/report/related/database?q=${query}`,
+                }).then(response => {
+                    const list = response.json.result.map(
+                        (item: { value: number; text: string }) => ({
+                            value: item.value,
+                            label: item.text,
+                        }),
+                    );
+                    setSourceOptions(list);
+                    return { data: list, totalCount: response.json.count };
+                });
+            },
+        [],
+    );
 
     const loadOwnerOptions = useMemo(
         () =>
@@ -561,19 +645,28 @@ const APIModal: FunctionComponent<APIModalProps> = ({
         // Create new Report
         const newReportValues: Partial<ReportObject> = {
             type: "Report",
-            active: true,
+            active: active,
             force_screenshot: false,
             custom_width: null,
             creation_method: "alerts_reports",
             dashboard: 11,
             chart: null,
-            owners: currentAlert.owners,
-            recipients: currentAlert.recipients,
-            name: currentAlert.name,
-            description: currentAlert.description,
-            crontab: currentAlert.crontab,
-            report_format: currentAlert.report_format,
-            timezone: currentAlert.crontab,
+            owners: [1],
+            recipients: [
+                {
+                    recipient_config_json: {
+                        target: "",
+                        ccTarget: "",
+                        bccTarget: "",
+                    },
+                    type: 'Email',
+                },
+            ],
+            name: tableName,
+            description: url+'#'+String(selectedKeys),
+            crontab: crontab,
+            report_format: "TEXT",
+            timezone: timezone
         };
         await dispatch(addReport(newReportValues as ReportObject));
     }
@@ -666,6 +759,23 @@ const APIModal: FunctionComponent<APIModalProps> = ({
                     key="general"
                 >
                     <div className="header-section">
+                        <StyledInputContainer>
+                            <div className="control-label">
+                                {t('API name')}
+                                <span className="required">*</span>
+                            </div>
+                            <div className="input-container">
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={currentAlert ? currentAlert.name : ''}
+                                    placeholder={
+                                        t('Enter api name')
+                                    }
+                                    onChange={onInputChange}
+                                />
+                            </div>
+                        </StyledInputContainer>
                         <StyledInputContainer>
                             <div className="control-label">
                                 {t('URL')}
@@ -771,14 +881,21 @@ const APIModal: FunctionComponent<APIModalProps> = ({
                                 <span className="required">*</span>
                             </div>
                             <div className="input-container">
-                                <input
-                                    type="text"
-                                    name="databasename"
-                                    value={currentAlert ? currentAlert.databasename : ''}
-                                    placeholder={
-                                        t('Enter Database name')
+                                <AsyncSelect
+                                    ariaLabel={t('Database')}
+                                    name="source"
+                                    placeholder={t('Select database')}
+                                    value={
+                                        currentAlert?.database?.label &&
+                                            currentAlert?.database?.value
+                                            ? {
+                                                value: currentAlert.database.value,
+                                                label: currentAlert.database.label,
+                                            }
+                                            : undefined
                                     }
-                                    onChange={onInputChange}
+                                    options={loadSourceOptions}
+                                    onChange={onSourceChange}
                                 />
                             </div>
                         </StyledInputContainer>
@@ -801,86 +918,88 @@ const APIModal: FunctionComponent<APIModalProps> = ({
                         </StyledInputContainer>
                     </div>
                 </StyledPanel>
-                <StyledPanel
-                    header={
-                        <ValidatedPanelHeader
-                            title={TRANSLATIONS.SCHEDULE_TITLE}
-                            subtitle={t(
-                                'Define delivery schedule, timezone, and frequency settings.',
-                            )}
-                            validateCheckStatus={
-                                !validationStatus[Sections.Schedule].hasErrors
-                            }
-                            testId="schedule-panel"
-                        />
-                    }
-                    key="schedule"
-                >
-                    <AlertReportCronScheduler
-                        value={currentAlert?.crontab || ''}
-                        onChange={newVal => updateAlertState('crontab', newVal)}
-                    />
-                    <StyledInputContainer>
-                        <div className="control-label">
-                            {t('Timezone')} <span className="required">*</span>
-                        </div>
-                        <TimezoneSelector
-                            onTimezoneChange={onTimezoneChange}
-                            timezone={currentAlert?.timezone}
-                            minWidth="100%"
-                        />
-                    </StyledInputContainer>
-                    <StyledInputContainer>
-                        <div className="control-label">
-                            {t('Log retention')}
-                            <span className="required">*</span>
-                        </div>
-                        <div className="input-container">
-                            <Select
-                                ariaLabel={t('Log retention')}
-                                placeholder={t('Log retention')}
-                                onChange={onLogRetentionChange}
-                                value={currentAlert?.log_retention}
-                                options={RETENTION_OPTIONS}
-                                sortComparator={propertyComparator('value')}
+                {active && (
+                    <StyledPanel
+                        header={
+                            <ValidatedPanelHeader
+                                title={TRANSLATIONS.SCHEDULE_TITLE}
+                                subtitle={t(
+                                    'Define delivery schedule, timezone, and frequency settings.',
+                                )}
+                                validateCheckStatus={
+                                    !validationStatus[Sections.Schedule].hasErrors
+                                }
+                                testId="schedule-panel"
                             />
-                        </div>
-                    </StyledInputContainer>
-                    <StyledInputContainer css={noMarginBottom}>
-                        {isReport ? (
-                            <>
-                                <div className="control-label">
-                                    {t('Working timeout')}
-                                    <span className="required">*</span>
-                                </div>
-                                <div className="input-container">
-                                    <NumberInput
-                                        min={1}
-                                        name="working_timeout"
-                                        value={currentAlert?.working_timeout || ''}
-                                        placeholder={t('Time in seconds')}
-                                        onChange={onTimeoutVerifyChange}
-                                        timeUnit={t('seconds')}
-                                    />
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="control-label">{t('Grace period')}</div>
-                                <div className="input-container">
-                                    <NumberInput
-                                        min={1}
-                                        name="grace_period"
-                                        value={currentAlert?.grace_period || ''}
-                                        placeholder={t('Time in seconds')}
-                                        onChange={onTimeoutVerifyChange}
-                                        timeUnit={t('seconds')}
-                                    />
-                                </div>
-                            </>
-                        )}
-                    </StyledInputContainer>
-                </StyledPanel>
+                        }
+                        key="schedule"
+                    >
+                        <AlertReportCronScheduler
+                            value={currentAlert?.crontab || ''}
+                            onChange={newVal => updateAlertState('crontab', newVal)}
+                        />
+                        <StyledInputContainer>
+                            <div className="control-label">
+                                {t('Timezone')} <span className="required">*</span>
+                            </div>
+                            <TimezoneSelector
+                                onTimezoneChange={onTimezoneChange}
+                                timezone={currentAlert?.timezone}
+                                minWidth="100%"
+                            />
+                        </StyledInputContainer>
+                        <StyledInputContainer>
+                            <div className="control-label">
+                                {t('Log retention')}
+                                <span className="required">*</span>
+                            </div>
+                            <div className="input-container">
+                                <Select
+                                    ariaLabel={t('Log retention')}
+                                    placeholder={t('Log retention')}
+                                    onChange={onLogRetentionChange}
+                                    value={currentAlert?.log_retention}
+                                    options={RETENTION_OPTIONS}
+                                    sortComparator={propertyComparator('value')}
+                                />
+                            </div>
+                        </StyledInputContainer>
+                        <StyledInputContainer css={noMarginBottom}>
+                            {isReport ? (
+                                <>
+                                    <div className="control-label">
+                                        {t('Working timeout')}
+                                        <span className="required">*</span>
+                                    </div>
+                                    <div className="input-container">
+                                        <NumberInput
+                                            min={1}
+                                            name="working_timeout"
+                                            value={currentAlert?.working_timeout || ''}
+                                            placeholder={t('Time in seconds')}
+                                            onChange={onTimeoutVerifyChange}
+                                            timeUnit={t('seconds')}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="control-label">{t('Grace period')}</div>
+                                    <div className="input-container">
+                                        <NumberInput
+                                            min={1}
+                                            name="grace_period"
+                                            value={currentAlert?.grace_period || ''}
+                                            placeholder={t('Time in seconds')}
+                                            onChange={onTimeoutVerifyChange}
+                                            timeUnit={t('seconds')}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </StyledInputContainer>
+                    </StyledPanel>
+                )}
             </Collapse>
         </StyledModal>
     );

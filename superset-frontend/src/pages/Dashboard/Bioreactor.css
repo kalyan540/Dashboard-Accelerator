@@ -1,0 +1,25 @@
+.bioreactor-container .title{
+    text-align: center;
+  }
+  .bioreactor-container .bioreactor-image {
+    height: 400px;
+  }
+  
+  .bioreactor-container .info-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 150px;
+  }
+  
+  .bioreactor-container .info-wrapper p {
+    margin-bottom: 5px;
+  }
+  
+  .bioreactor-container .property {
+    margin: 20px 0;
+    border: 1px solid #d3d3d3;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  

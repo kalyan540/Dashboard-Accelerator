@@ -38,7 +38,6 @@ logger = logging.getLogger(__name__)
 
 REPORT_SCHEDULE_ERROR_NOTIFICATION_MARKER = "Notification sent with error"
 
-
 class ReportScheduleDAO(BaseDAO[ReportSchedule]):
     base_filter = ReportScheduleFilter
 
@@ -209,6 +208,18 @@ class ReportScheduleDAO(BaseDAO[ReportSchedule]):
         return (
             db.session.query(ReportSchedule)
             .filter(ReportSchedule.active.is_(True))
+            .filter(ReportSchedule.report_format != "TEXT")
+            .all()
+        )
+    @staticmethod
+    def find_active_api() -> list[ReportSchedule]:
+        """
+        Find all active reports.
+        """
+        return (
+            db.session.query(ReportSchedule)
+            .filter(ReportSchedule.active.is_(True))
+            .filter(ReportSchedule.report_format == "TEXT")
             .all()
         )
 
