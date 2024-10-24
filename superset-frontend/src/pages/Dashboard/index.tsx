@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FC, useState } from 'react';
+import { FC, useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardPage } from 'src/dashboard/containers/DashboardPage';
 import './Buttons.css';
@@ -29,10 +29,21 @@ import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/ac
 import { useSelector } from 'react-redux';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { t } from '@superset-ui/core';
+import IDContext from 'src/views/idOrSlugContext';
+
 
 
 const DashboardRoute: FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
+  const {idState, updateidOrSlug} = useContext(IDContext);
+  useEffect(() => {
+    updateidOrSlug(idOrSlug);
+    console.log(idOrSlug);
+  }, []);
+
+
+  // Get the global variable
+  //const globalValue = getGlobalIdOrSlug();
   //return <DashboardPage idOrSlug={idOrSlug} />;
   const [activeButton, setActiveButton] = useState<string>('Dashboard');
   //const user = useSelector((state: RootState) => state.user);
@@ -45,6 +56,7 @@ const DashboardRoute: FC = () => {
   const handleButtonClick = (buttonName: string) => {
     setActiveButton(buttonName);
   };
+
   return (
     <div style={{ display: "flex" }}>
       {/* Left Panel with Buttons */}
@@ -115,7 +127,7 @@ const DashboardRoute: FC = () => {
       {/* Right Panel Content */}
       <div className="right-panel">
         {activeButton === 'Dashboard' ? (
-          <DashboardPage idOrSlug={idOrSlug} />
+          <DashboardPage idOrSlug={idState} />
         ) : activeButton === 'Configuration' ? (
           <div>
             <h2>This Configuration page is in development.</h2>

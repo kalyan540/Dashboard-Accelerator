@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ReactNode, RefObject, useCallback, useMemo, useState } from 'react';
+import { ReactNode, RefObject, useCallback, useMemo, useState, useContext } from 'react';
 import { isEmpty } from 'lodash';
 import {
   Behavior,
@@ -30,7 +30,6 @@ import {
   styled,
   t,
 } from '@superset-ui/core';
-import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Menu } from 'src/components/Menu';
 import { RootState } from 'src/dashboard/types';
@@ -38,10 +37,13 @@ import DrillDetailModal from './DrillDetailModal';
 import { getSubmenuYOffset } from '../utils';
 import { MenuItemTooltip } from '../DisabledMenuItemTooltip';
 import { MenuItemWithTruncation } from '../MenuItemWithTruncation';
+import { setGlobalIdOrSlug } from 'src/global';
+import IDContext from 'src/views/idOrSlugContext';
+//
 
 const DRILL_TO_DETAIL = t('Drill to detail');
 const DRILL_TO_DETAIL_BY = t('Drill to detail by');
-const DRILL_TO_DETAIL_CUSTOM = t('Drill to detail custom');
+const DRILL_TO_DETAIL_CUSTOM = t('View Details');
 const DISABLED_REASONS = {
   DATABASE: t(
     'Drill to detail is disabled for this database. Change the database settings to enable it.',
@@ -105,6 +107,7 @@ export type DrillDetailMenuItemsProps = {
   drillToDetailMenuRef?: RefObject<any>;
 };
 
+
 const DrillDetailMenuItems = ({
   chartId,
   formData,
@@ -119,7 +122,6 @@ const DrillDetailMenuItems = ({
   drillToDetailMenuRef,
   ...props
 }: DrillDetailMenuItemsProps) => {
-  const history = useHistory();
   const drillToDetailDisabled = useSelector<RootState, boolean | undefined>(
     ({ datasources }) =>
       datasources[formData.datasource]?.database?.disable_drill_to_detail,
@@ -129,12 +131,14 @@ const DrillDetailMenuItems = ({
     [],
   );
 
+  const {updateidOrSlug} = useContext(IDContext)
+
   // Function to navigate to DashboardPage with idOrSlug=13
   const navigateToDashboard = useCallback((event) => {
-    onClick(event); // Trigger the original onClick logic if needed
-    onSelection(); // Call the selection logic if any
-    history.push('13'); // Navigate to DashboardPage with idOrSlug=13
-  }, [onClick, onSelection, history]);
+    //setGlobalIdOrSlug('13');
+    updateidOrSlug('13');
+
+  },[]);
 
   const openModal = useCallback(
     (filters, event) => {
@@ -228,7 +232,7 @@ const DrillDetailMenuItems = ({
       {filters.map((filter, i) => (
           <Menu.Item
             {...props}
-            key={`drill-detail-filter-${i}`}
+            key={`drill-detail-filte-${i}`}
             onClick={navigateToDashboard}
           >
             <div>
