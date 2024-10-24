@@ -37,7 +37,6 @@ import DrillDetailModal from './DrillDetailModal';
 import { getSubmenuYOffset } from '../utils';
 import { MenuItemTooltip } from '../DisabledMenuItemTooltip';
 import { MenuItemWithTruncation } from '../MenuItemWithTruncation';
-import { setGlobalIdOrSlug } from 'src/global';
 import IDContext from 'src/views/idOrSlugContext';
 //
 
@@ -131,7 +130,7 @@ const DrillDetailMenuItems = ({
     [],
   );
 
-  const {updateidOrSlug} = useContext(IDContext)
+  const {updateidOrSlug} = useContext(IDContext);
 
   // Function to navigate to DashboardPage with idOrSlug=13
   const navigateToDashboard = useCallback((event) => {

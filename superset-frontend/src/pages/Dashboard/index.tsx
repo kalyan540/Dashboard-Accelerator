@@ -35,7 +35,9 @@ import IDContext from 'src/views/idOrSlugContext';
 
 const DashboardRoute: FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
+  
   const {idState, updateidOrSlug} = useContext(IDContext);
+  
   useEffect(() => {
     updateidOrSlug(idOrSlug);
     console.log(idOrSlug);
