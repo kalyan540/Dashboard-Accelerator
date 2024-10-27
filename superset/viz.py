@@ -1510,38 +1510,67 @@ class WorldMapViz(BaseViz):
         if df.empty:
             return None
 
-        # pylint: disable=import-outside-toplevel
+        # Import inside function scope
         from superset.examples import countries
 
+        # Fetch relevant column names
         cols = get_column_names([self.form_data.get("entity")])  # type: ignore
         metric = utils.get_metric_name(self.form_data["metric"])
+        metrics = utils.get_metric_names(self.form_data["metrics"])
+        logger.info("Cache key: %s", cols)
+        logger.info("Cache key: %s", metric)
+        logger.info("Cache key: %s", metrics)
+        logger.info("Cache key: %s", df.columns)
         secondary_metric = (
             utils.get_metric_name(self.form_data["secondary_metric"])
             if self.form_data.get("secondary_metric")
             else None
         )
-        columns = ["country", "m1", "m2"]
+
+        # Define initial column structure
+        columns = ["country", "m1", "tooltip"] if not secondary_metric else ["country", "m1", "m2", "tooltip"]
+
+        # Adjust columns and metrics based on secondary metric presence
         if metric == secondary_metric:
             ndf = df[cols]
             ndf["m1"] = df[metric]
             ndf["m2"] = ndf["m1"]
         else:
-            if secondary_metric:
-                cols += [metric, secondary_metric]
-            else:
-                cols += [metric]
-                columns = ["country", "m1"]
+            cols += [metric] + ([secondary_metric] if secondary_metric else [])
             ndf = df[cols]
-        df = ndf
-        df.columns = columns
+            ndf["m1"] = df[metric]
+            if secondary_metric:
+                ndf["m2"] = df[secondary_metric]
+
+        # Populate the `tooltip` column with dictionaries containing metric names and values
+        tooltip_data = []
+        for _, row in df.iterrows():
+            tooltip_entry = {}
+            for metric_name in metrics:
+                col_name = metric_name.split("(")[-1].replace(")", "")
+                if metric_name in df.columns:
+                    value = row[metric_name]
+                    tooltip_entry[col_name]= value
+            tooltip_data.append(tooltip_entry)
+        logger.info("Cache key: %s", tooltip_data)
+        logger.info("Cache key: %s", ndf)
+        logger.info("Cache key: %s", df)
+        ndf["tooltip"] = tooltip_data
+
+        # Ensure column alignment
+        if len(ndf.columns) == len(columns):
+            df = ndf
+            df.columns = columns
+        else:
+            raise ValueError("Mismatch between the DataFrame columns and specified columns list")
+
+        # Convert DataFrame to a list of dictionaries with relevant transformations
         data = df.to_dict(orient="records")
         for row in data:
             country = None
             if isinstance(row["country"], str):
                 if "country_fieldtype" in self.form_data:
-                    country = countries.get(
-                        self.form_data["country_fieldtype"], row["country"]
-                    )
+                    country = countries.get(self.form_data["country_fieldtype"], row["country"])
             if country:
                 row["country"] = country["cca3"]
                 row["latitude"] = country["lat"]
@@ -1549,6 +1578,7 @@ class WorldMapViz(BaseViz):
                 row["name"] = country["name"]
             else:
                 row["country"] = "XXX"
+
         return data
 
 

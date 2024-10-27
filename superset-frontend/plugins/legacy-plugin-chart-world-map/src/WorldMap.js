@@ -36,6 +36,7 @@ const propTypes = {
       name: PropTypes.string,
       m1: PropTypes.number,
       m2: PropTypes.number,
+      tooltip: PropTypes.objectOf(PropTypes.number),
     }),
   ),
   height: PropTypes.number,
@@ -77,6 +78,7 @@ function WorldMap(element, props) {
 
   // Ignore XXX's to get better normalization
   const filteredData = data.filter(d => d.country && d.country !== 'XXX');
+  console.log(data);
 
   const extRadius = d3.extent(filteredData, d => Math.sqrt(d.m2));
   const radiusScale = d3.scale
@@ -133,12 +135,12 @@ function WorldMap(element, props) {
         extraFormData: {
           filters: values.length
             ? [
-                {
-                  col: entity,
-                  op: 'IN',
-                  val: values,
-                },
-              ]
+              {
+                col: entity,
+                op: 'IN',
+                val: values,
+              },
+            ]
             : [],
         },
         filterState: {
@@ -150,7 +152,9 @@ function WorldMap(element, props) {
     };
   };
 
+
   const handleClick = source => {
+    handleContextMenu(source);
     if (!emitCrossFilters) {
       return;
     }
@@ -162,6 +166,7 @@ function WorldMap(element, props) {
     if (dataMask) {
       setDataMask(dataMask);
     }
+
   };
 
   const handleContextMenu = source => {
@@ -212,10 +217,21 @@ function WorldMap(element, props) {
       highlightBorderColor: theme.colors.grayscale.light5,
       highlightFillColor: color,
       highlightBorderWidth: 1,
-      popupTemplate: (geo, d) =>
-        `<div class="hoverinfo"><strong>${d.name}</strong><br>${formatter(
-          d.m1,
-        )}</div>`,
+      popupTemplate: (geo, d) => {
+        let popupContent = `<div class="hoverinfo"><strong>${d.name}</strong><br>`;
+
+        popupContent += `<div style="text-align: left;">`;
+        for (const [key, value] of Object.entries(d.tooltip)) {
+          popupContent += `${key}: ${value}<br>`;
+        }
+        popupContent += `</div>`;
+
+
+        // Close the div
+        popupContent += '</div>';
+        console.log(popupContent);
+        return popupContent;
+      },
     },
     bubblesConfig: {
       borderWidth: 1,

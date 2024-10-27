@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FC, useState, useEffect, useContext } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardPage } from 'src/dashboard/containers/DashboardPage';
 import './Buttons.css';
@@ -29,14 +29,14 @@ import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/ac
 import { useSelector } from 'react-redux';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { t } from '@superset-ui/core';
-import IDContext from 'src/views/idOrSlugContext';
+import {useID} from 'src/views/idOrSlugContext';
 
 
 
 const DashboardRoute: FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
   
-  const {idState, updateidOrSlug} = useContext(IDContext);
+  const {idState, updateidOrSlug} = useID();
   
   useEffect(() => {
     updateidOrSlug(idOrSlug);
@@ -72,6 +72,13 @@ const DashboardRoute: FC = () => {
             Dashboard
           </button>
           <button
+            className={`button ${activeButton === 'Bioreactor' ? 'active' : ''}`}
+            onClick={() => handleButtonClick('Bioreactor')}
+          >
+            <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
+            Bioreactor
+          </button>
+          <button
             className={`button ${activeButton === 'Analytics' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Analytics')}
           >
@@ -84,13 +91,6 @@ const DashboardRoute: FC = () => {
           >
             <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
             Assert Model
-          </button>
-          <button
-            className={`button ${activeButton === 'Bioreactor' ? 'active' : ''}`}
-            onClick={() => handleButtonClick('Bioreactor')}
-          >
-            <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
-            Bioreactor
           </button>
           <button
             className={`button ${activeButton === 'Alerts' ? 'active' : ''}`}

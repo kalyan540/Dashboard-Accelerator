@@ -46,7 +46,7 @@ const config: ControlPanelConfig = {
               ],
               description: t(
                 'The country code standard that Superset should expect ' +
-                  'to find in the [country] column',
+                'to find in the [country] column',
               ),
             },
           },
@@ -95,6 +95,7 @@ const config: ControlPanelConfig = {
           },
         ],
         ['color_picker'],
+        ['metrics'],
         [
           {
             name: 'color_by',
@@ -127,6 +128,10 @@ const config: ControlPanelConfig = {
       label: t('Country Column'),
       description: t('3 letter code of the country'),
     },
+    metrics: {
+      label: t('Tooltip metrics'),
+      description: t('Select metrics you want to show on tooltip'),
+    },
     secondary_metric: {
       label: t('Bubble Size'),
       description: t('Metric that defines the size of the bubble'),
@@ -149,6 +154,7 @@ const config: ControlPanelConfig = {
     ...formData,
     entity: getStandardizedControls().shiftColumn(),
     metric: getStandardizedControls().shiftMetric(),
+    metrics: getStandardizedControls().popAllMetrics(),
   }),
 };
 

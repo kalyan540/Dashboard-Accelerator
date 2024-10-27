@@ -43,6 +43,7 @@ export default function transformProps(chartProps) {
     colorScheme,
     sliceId,
     metric,
+    metrics,
     yAxisFormat,
     currencyFormat,
   } = formData;
@@ -51,11 +52,13 @@ export default function transformProps(chartProps) {
 
   const formatter = getValueFormatter(
     metric,
+    metrics,
     currencyFormats,
     columnFormats,
     yAxisFormat,
     currencyFormat,
   );
+  console.log(queriesData);
 
   return {
     countryFieldtype,

@@ -96,76 +96,79 @@ def api_scheduler() -> None:
             print("Iam Here API Scheduler")
             print(active_api_schedule)
             print(active_api_schedule.description)
-            url, data_part = active_api_schedule.description.split('#')
-            data_list = data_part.split(',')
-            # Output the results
-            print("URL:", url)
-            print("Data List:", data_list)
-            print("TableName:", active_api_schedule.name)
+            for schedule in cron_schedule_window(
+                triggered_at, active_api_schedule.crontab, active_api_schedule.timezone
+            ):
+                url, data_part = active_api_schedule.description.split('#')
+                data_list = data_part.split(',')
+                # Output the results
+                print("URL:", url)
+                print("Data List:", data_list)
+                print("TableName:", active_api_schedule.name)
 
-            db_config = {
-                "dbname": "examples",
-                "user": "superset",
-                "password": "superset",
-                "host": "superset_db",  # Your PostgreSQL host
-                "port": "5432"
-            }
+                db_config = {
+                    "dbname": "examples",
+                    "user": "superset",
+                    "password": "superset",
+                    "host": "superset_db",  # Your PostgreSQL host
+                    "port": "5432"
+                }
 
-            keys = data_list
-            url = url
-            table_name = active_api_schedule.name
-            print(f"Keys:{keys}")
+                keys = data_list
+                url = url
+                table_name = active_api_schedule.name
+                print(f"Keys:{keys}")
 
-            if not keys or not url or not table_name:
-                return jsonify({'error': 'Missing keys, url, or table_name in the request body'}), 400
+                if not keys or not url or not table_name:
+                    return jsonify({'error': 'Missing keys, url, or table_name in the request body'}), 400
 
-            # Fetch data from the API
-            response = requests.get(url)
-            if response.status_code != 200:
-                return jsonify({'error': 'Failed to fetch data from the API'}), 500
+                # Fetch data from the API
+                response = requests.get(url)
+                if response.status_code != 200:
+                    return jsonify({'error': 'Failed to fetch data from the API'}), 500
 
-            api_data = response.json()
-            # Example selected keys
-            selected_keys = keys
-            split_keys = [key.split('.') for key in selected_keys]
-            columns = [split_key[-1] for split_key in split_keys]
+                api_data = response.json()
+                # Example selected keys
+                selected_keys = keys
+                split_keys = [key.split('.') for key in selected_keys]
+                columns = [split_key[-1] for split_key in split_keys]
 
-            # Process the results
-            rows = process_results(api_data, split_keys)
+                # Process the results
+                rows = process_results(api_data, split_keys)
 
-            conn = psycopg2.connect(**db_config)
-            cur = conn.cursor()
-            # Create table dynamically based on the columns from the API response
-            create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
-                {", ".join([f'"{col}" TEXT' for col in columns])}
-            );"""
-            cur.execute(create_table_query)
+                conn = psycopg2.connect(**db_config)
+                cur = conn.cursor()
+                # Create table dynamically based on the columns from the API response
+                create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
+                    {", ".join([f'"{col}" TEXT' for col in columns])}
+                );"""
+                cur.execute(create_table_query)
 
-            for entry in rows:
-                # Check if the entry already exists in the table
-                select_query = f"""
-                    SELECT 1 FROM {table_name} 
-                    WHERE {" AND ".join([f'CAST("{col}" AS TEXT) = %s' if isinstance(entry[i], str) else f'CAST("{col}" AS INTEGER) = %s' for i, col in enumerate(columns)])};
-                """
-                cur.execute(select_query, entry)
-                existing_entry = cur.fetchone()
+                for entry in rows:
+                    # Check if the entry already exists in the table
+                    select_query = f"""
+                        SELECT 1 FROM {table_name} 
+                        WHERE {" AND ".join([f'CAST("{col}" AS TEXT) = %s' if isinstance(entry[i], str) else f'CAST("{col}" AS INTEGER) = %s' for i, col in enumerate(columns)])};
+                    """
+                    cur.execute(select_query, entry)
+                    existing_entry = cur.fetchone()
 
-                # If the entry does not exist, insert the new row
-                if not existing_entry:
-                    insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
-                                        VALUES ({", ".join(['%s' for _ in columns])});"""
-                    cur.execute(insert_query, entry)
-            # Grant necessary permissions to the user 'admin'
-            #grant_permissions_query = f"""GRANT SELECT ON TABLE examples.public.{table_name} TO PUBLIC;"""
-            #cur.execute(grant_permissions_query)
+                    # If the entry does not exist, insert the new row
+                    if not existing_entry:
+                        insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
+                                            VALUES ({", ".join(['%s' for _ in columns])});"""
+                        cur.execute(insert_query, entry)
+                # Grant necessary permissions to the user 'admin'
+                #grant_permissions_query = f"""GRANT SELECT ON TABLE examples.public.{table_name} TO PUBLIC;"""
+                #cur.execute(grant_permissions_query)
 
-            conn.commit()
-            cur.close()
-            conn.close()
-            # For testing: print rows to logger
-            for row in rows:
-                #logger.info(f"Row: {row}")
-                print(f"Row: {row}")
+                conn.commit()
+                cur.close()
+                conn.close()
+                # For testing: print rows to logger
+                for row in rows:
+                    #logger.info(f"Row: {row}")
+                    print(f"Row: {row}")
 
     except SoftTimeLimitExceeded as ex:
         logger.warning("A timeout occurred while api schedule logs: %s", ex)

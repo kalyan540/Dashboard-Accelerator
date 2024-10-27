@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ReactNode, RefObject, useCallback, useMemo, useState, useContext } from 'react';
+import { ReactNode, RefObject, useCallback, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import {
   Behavior,
@@ -37,7 +37,7 @@ import DrillDetailModal from './DrillDetailModal';
 import { getSubmenuYOffset } from '../utils';
 import { MenuItemTooltip } from '../DisabledMenuItemTooltip';
 import { MenuItemWithTruncation } from '../MenuItemWithTruncation';
-import IDContext from 'src/views/idOrSlugContext';
+import {useID} from 'src/views/idOrSlugContext';
 //
 
 const DRILL_TO_DETAIL = t('Drill to detail');
@@ -121,6 +121,7 @@ const DrillDetailMenuItems = ({
   drillToDetailMenuRef,
   ...props
 }: DrillDetailMenuItemsProps) => {
+  console.log("Filters: ",filters);
   const drillToDetailDisabled = useSelector<RootState, boolean | undefined>(
     ({ datasources }) =>
       datasources[formData.datasource]?.database?.disable_drill_to_detail,
@@ -130,7 +131,7 @@ const DrillDetailMenuItems = ({
     [],
   );
 
-  const {updateidOrSlug} = useContext(IDContext);
+  const {updateidOrSlug} = useID();
 
   // Function to navigate to DashboardPage with idOrSlug=13
   const navigateToDashboard = useCallback((event) => {
