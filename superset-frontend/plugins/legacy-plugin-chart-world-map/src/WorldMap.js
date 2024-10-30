@@ -154,7 +154,7 @@ function WorldMap(element, props) {
 
 
   const handleClick = source => {
-    
+
     if (!emitCrossFilters) {
       handleOnclick(source);
       return;
@@ -299,6 +299,54 @@ function WorldMap(element, props) {
   });
 
   map.updateChoropleth(mapData);
+  // Inline CSS for tooltip styling
+  const style = document.createElement('style');
+  style.innerHTML = `
+  .country-tooltip {
+    background-color: white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    text-align: left;
+    pointer-events: none; /* Ensures tooltip doesn't interfere with map */
+    position: absolute;
+    z-index: 10;
+  }
+
+  .country-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -5px; /* Adjust for pointer */
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent white transparent transparent; /* Arrow pointing left */
+  }
+`;
+  document.head.appendChild(style);
+  const widthFactor = width / 360;   // 360 degrees longitude range
+  const heightFactor = height / 180; // 180 degrees latitude range
+
+
+  // Append a div for each tooltip based on processedData
+  processedData.forEach(d => {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'country-tooltip';
+
+    // Tooltip HTML content
+    let tooltipContent = `<strong>${d.name}</strong><br>`;
+    for (const [key, value] of Object.entries(d.tooltip)) {
+      tooltipContent += `${key}: ${value}<br>`;
+    }
+    tooltip.innerHTML = tooltipContent;
+
+    // Set positioning based on country's coordinates
+    //tooltip.style.position = 'absolute';
+    tooltip.style.left = `${(d.longitude + 180) * widthFactor}px`;  // Shift to 0-360 range for left positioning
+    tooltip.style.top = `${(90 - d.latitude) * heightFactor}px`;    // Invert latitude for top positioning   // Adjust heightFactor as needed
+
+    element.appendChild(tooltip);  // Append to map container
+  });
 
   if (showBubbles) {
     map.bubbles(processedData);
@@ -327,6 +375,8 @@ function WorldMap(element, props) {
       );
     });
   }
+  console.log(map);
+  console.log(mapData);
 }
 
 WorldMap.displayName = 'WorldMap';
