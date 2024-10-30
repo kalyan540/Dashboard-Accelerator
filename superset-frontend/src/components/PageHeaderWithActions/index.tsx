@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ReactNode, ReactElement } from 'react';
+import { ReactNode, ReactElement, useEffect, useState } from 'react';
 import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
 import { AntdDropdown, AntdDropdownProps } from 'src/components';
 import { TooltipPlacement } from 'src/components/Tooltip';
@@ -28,6 +28,7 @@ import CertifiedBadge, { CertifiedBadgeProps } from '../CertifiedBadge';
 import FaveStar, { FaveStarProps } from '../FaveStar';
 import Icons from '../Icons';
 import Button from '../Button';
+import {useID} from 'src/views/idOrSlugContext';
 
 export const menuTriggerStyles = (theme: SupersetTheme) => css`
   width: ${theme.gridUnit * 8}px;
@@ -137,6 +138,20 @@ export const PageHeaderWithActions = ({
   tooltipProps,
 }: PageHeaderWithActionsProps) => {
   const theme = useTheme();
+  const { idState, removeLastIdOrSlug } = useID();
+  const [showBackButton, setShowBackButton] = useState(false);
+
+  useEffect(() => {
+    if (idState.length > 1) {
+      setShowBackButton(true);
+    } else {
+      setShowBackButton(false);
+    }
+  }, [idState]);
+
+  const handleBackButtonClick = () => {
+    removeLastIdOrSlug();
+  };
   return (
     <div css={headerStyles} className="header-with-actions">
       <div className="title-panel">
@@ -151,6 +166,16 @@ export const PageHeaderWithActions = ({
           </div>
         )}
       </div>
+      {showBackButton && (
+        <div className="back-button">
+          <Button
+            onClick={handleBackButtonClick} // Define this function to handle the back action
+            aria-label="Back"
+          >
+            Back
+          </Button>
+        </div>
+      )}
       <div className="right-button-panel">
         {rightPanelAdditionalItems}
         <div css={additionalActionsContainerStyles}>

@@ -29,20 +29,27 @@ import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/ac
 import { useSelector } from 'react-redux';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { t } from '@superset-ui/core';
-import {useID} from 'src/views/idOrSlugContext';
+import { useID } from 'src/views/idOrSlugContext';
 
 
 
 const DashboardRoute: FC = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
-  
-  const {idState, updateidOrSlug} = useID();
-  
-  useEffect(() => {
-    updateidOrSlug(idOrSlug);
-    console.log(idOrSlug);
-  }, []);
 
+  const { idState, updateidOrSlug, removeLastIdOrSlug } = useID();
+
+  useEffect(() => {
+    if (idState.length == 0 || idState[idState.length - 1] != idOrSlug) {
+      console.log("id length: %s",idState.length);
+      console.log("last element: %s, idOrSlug: %s",idState[idState.length - 1], idOrSlug);
+      updateidOrSlug(idOrSlug);
+    }
+    console.log(idOrSlug);
+
+    return () => {
+      removeLastIdOrSlug();
+    };
+  }, [idOrSlug]);
 
   // Get the global variable
   //const globalValue = getGlobalIdOrSlug();
@@ -63,7 +70,7 @@ const DashboardRoute: FC = () => {
     <div style={{ display: "flex" }}>
       {/* Left Panel with Buttons */}
       <div className="left-panel">
-        <div className="button-container">
+        <div className="buttons-container">
           <button
             className={`button ${activeButton === 'Dashboard' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Dashboard')}
@@ -129,7 +136,7 @@ const DashboardRoute: FC = () => {
       {/* Right Panel Content */}
       <div className="right-panel">
         {activeButton === 'Dashboard' ? (
-          <DashboardPage idOrSlug={idState} />
+          <DashboardPage idOrSlug={idState[idState.length - 1]} />
         ) : activeButton === 'Configuration' ? (
           <div>
             <h2>This Configuration page is in development.</h2>
@@ -156,15 +163,15 @@ const DashboardRoute: FC = () => {
             <h2>This Asset Model page is in development.</h2>
           </div>
         )
-        : activeButton === 'Bioreactor' ? (
-          <Bioreactor/>
-        ) : activeButton === 'Analytics' ? (
-          <Analytics />
-        ) : (
-          <div>
-            <h2>This page is in development.</h2>
-          </div>
-        )}
+          : activeButton === 'Bioreactor' ? (
+            <Bioreactor />
+          ) : activeButton === 'Analytics' ? (
+            <Analytics />
+          ) : (
+            <div>
+              <h2>This page is in development.</h2>
+            </div>
+          )}
       </div>
     </div>
   );

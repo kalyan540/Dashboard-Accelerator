@@ -45,6 +45,7 @@ export interface ContextMenuFilters {
     groupbyFieldName: string;
     adhocFilterFieldName?: string;
   };
+  onclick?: Boolean;
 }
 
 export enum AppSection {

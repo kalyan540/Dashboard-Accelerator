@@ -47,6 +47,7 @@ import { DrillDetailMenuItems } from '../DrillDetail';
 import { getMenuAdjustedY } from '../utils';
 import { MenuItemTooltip } from '../DisabledMenuItemTooltip';
 import { DrillByMenuItems } from '../DrillBy/DrillByMenuItems';
+import DrillDashboard from '../DrillDashboard/DrillDashboard';
 
 export enum ContextMenuItem {
   CrossFilter,
@@ -124,6 +125,8 @@ const ChartContextMenu = (
 
   const menuItems = [];
 
+  const onclick = filters?.onclick;
+  console.log(onclick);
   const showDrillToDetail =
     isFeatureEnabled(FeatureFlag.DrillToDetail) &&
     canDrillToDetail &&
@@ -293,7 +296,11 @@ const ChartContextMenu = (
     [open],
   );
 
-  return ReactDOM.createPortal(
+  
+  return onclick ? (
+    // Condition is met ("yes" case)
+    <DrillDashboard filters={filters} />
+  ) : (ReactDOM.createPortal(
     <Dropdown
       overlay={
         <Menu
@@ -326,7 +333,7 @@ const ChartContextMenu = (
       />
     </Dropdown>,
     document.body,
-  );
+  ));
 };
 
 export default forwardRef(ChartContextMenu);

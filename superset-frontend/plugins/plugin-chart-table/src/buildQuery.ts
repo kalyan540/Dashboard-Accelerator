@@ -114,8 +114,8 @@ const buildQuery: BuildQuery<TableChartFormData> = (
       }
     }
 
-    let temporalColumnAdded = false;
-    let temporalColumn = null;
+    let temporalColumAdded = false;
+    let temporalColum = null;
 
     if (queryMode === QueryMode.Aggregate) {
       metrics = metrics || [];
@@ -169,23 +169,23 @@ const buildQuery: BuildQuery<TableChartFormData> = (
           time_grain_sqla &&
           temporalColumnsLookup?.[col];
 
-        if (shouldBeAdded && !temporalColumnAdded) {
-          temporalColumn = {
+        if (shouldBeAdded && !temporalColumAdded) {
+          temporalColum = {
             timeGrain: time_grain_sqla,
             columnType: 'BASE_AXIS',
             sqlExpression: col,
             label: col,
             expressionType: 'SQL',
           } as AdhocColumn;
-          temporalColumnAdded = true;
+          temporalColumAdded = true;
           return false; // Do not include this in the output; it's added separately
         }
         return true;
       });
 
       // So we ensure the temporal column is added first
-      if (temporalColumn) {
-        columns = [temporalColumn, ...columns];
+      if (temporalColum) {
+        columns = [temporalColum, ...columns];
       }
     }
 
@@ -198,15 +198,10 @@ const buildQuery: BuildQuery<TableChartFormData> = (
         (ownState.currentPage ?? 0) * (ownState.pageSize ?? 0);
     }
 
-    if (!temporalColumn) {
-      // This query is not using temporal column, so it doesn't need time grain
-      extras.time_grain_sqla = undefined;
-    }
-
     let queryObject = {
       ...baseQueryObject,
       columns,
-      extras,
+      extras: !isEmpty(timeOffsets) && !temporalColum ? {} : extras,
       orderby,
       metrics,
       post_processing: postProcessing,
@@ -244,6 +239,7 @@ const buildQuery: BuildQuery<TableChartFormData> = (
         row_limit: 0,
         row_offset: 0,
         post_processing: [],
+        extras: undefined, // we don't need time grain here
         order_desc: undefined, // we don't need orderby stuff here,
         orderby: undefined, // because this query will be used for get total aggregation.
       });

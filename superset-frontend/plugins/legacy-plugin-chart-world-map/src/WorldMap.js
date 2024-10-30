@@ -154,8 +154,9 @@ function WorldMap(element, props) {
 
 
   const handleClick = source => {
-    handleContextMenu(source);
+    
     if (!emitCrossFilters) {
+      handleOnclick(source);
       return;
     }
     const pointerEvent = d3.event;
@@ -166,6 +167,40 @@ function WorldMap(element, props) {
     if (dataMask) {
       setDataMask(dataMask);
     }
+
+  };
+
+  const handleOnclick = source => {
+    const pointerEvent = d3.event;
+    pointerEvent.preventDefault();
+    const key = source.id || source.country;
+    const val =
+      countryFieldtype === 'name' ? mapData[key]?.name : mapData[key]?.country;
+    let drillToDetailFilters;
+    let drillByFilters;
+    if (val) {
+      drillToDetailFilters = [
+        {
+          col: entity,
+          op: '==',
+          val,
+          formattedVal: val,
+        },
+      ];
+      drillByFilters = [
+        {
+          col: entity,
+          op: '==',
+          val,
+        },
+      ];
+    }
+    onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
+      drillToDetail: drillToDetailFilters,
+      crossFilter: getCrossFilterDataMask(source),
+      drillBy: { filters: drillByFilters, groupbyFieldName: 'entity' },
+      onclick: true
+    });
 
   };
 
@@ -198,6 +233,7 @@ function WorldMap(element, props) {
       drillToDetail: drillToDetailFilters,
       crossFilter: getCrossFilterDataMask(source),
       drillBy: { filters: drillByFilters, groupbyFieldName: 'entity' },
+      onclick: false
     });
   };
 

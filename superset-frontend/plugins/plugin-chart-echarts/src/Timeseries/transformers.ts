@@ -167,7 +167,6 @@ export function transformSeries(
     lineStyle?: LineStyleOption;
     queryIndex?: number;
     timeCompare?: string[];
-    timeShiftColor?: boolean;
   },
 ): SeriesOption | undefined {
   const { name } = series;
@@ -191,12 +190,10 @@ export function transformSeries(
     showValueIndexes = [],
     thresholdValues = [],
     richTooltip,
-    seriesKey,
     sliceId,
     isHorizontal = false,
     queryIndex = 0,
     timeCompare = [],
-    timeShiftColor,
   } = opts;
   const contexts = seriesContexts[name || ''] || [];
   const hasForecast =
@@ -212,7 +209,7 @@ export function transformSeries(
     filterState?.selectedValues && !filterState?.selectedValues.includes(name);
   const opacity = isFiltered
     ? OpacityEnum.SemiTransparent
-    : opts.lineStyle?.opacity || OpacityEnum.NonTransparent;
+    : OpacityEnum.NonTransparent;
 
   // don't create a series if doing a stack or area chart and the result
   // is a confidence band
@@ -244,22 +241,11 @@ export function transformSeries(
   } else {
     plotType = seriesType === 'bar' ? 'bar' : 'line';
   }
-  /**
-   * if timeShiftColor is enabled the colorScaleKey forces the color to be the
-   * same as the original series, otherwise uses separate colors
-   * */
-  const itemStyle: ItemStyleOption = {
-    color: timeShiftColor
-      ? colorScale(colorScaleKey, sliceId)
-      : colorScale(seriesKey || forecastSeries.name, sliceId),
+  // forcing the colorScale to return a different color for same metrics across different queries
+  const itemStyle = {
+    color: colorScale(colorScaleKey, sliceId),
     opacity,
-    borderWidth: 0,
   };
-  if (seriesType === 'bar' && connectNulls) {
-    itemStyle.borderWidth = 1.5;
-    itemStyle.borderType = 'dotted';
-    itemStyle.borderColor = itemStyle.color;
-  }
   let emphasis = {};
   let showSymbol = false;
   if (!isConfidenceBand) {

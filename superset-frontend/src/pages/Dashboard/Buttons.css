@@ -34,7 +34,7 @@
     /* Add some padding to the container */
 }
 
-.button-container {
+.buttons-container {
     width: 200px;
     /* Set the container width to 150px */
     display: flex;
