@@ -1,25 +1,63 @@
 .bioreactor-container .title{
-    text-align: center;
-  }
-  .bioreactor-container .bioreactor-image {
-    height: 400px;
-  }
-  
-  .bioreactor-container .info-wrapper{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 150px;
-  }
-  
-  .bioreactor-container .info-wrapper p {
-    margin-bottom: 5px;
-  }
-  
-  .bioreactor-container .property {
-    margin: 20px 0;
-    border: 1px solid #d3d3d3;
-    padding: 10px;
-    border-radius: 10px;
-  }
-  
+  text-align: center;
+}
+.bioreactor-container .bioreactor-image {
+  height: 400px;
+  width: 300px;
+}
+
+.bioreactor-container .info-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  background-color: #fff;
+  height: 600px;
+}
+
+.bioreactor-container .info-wrapper p {
+  margin-bottom: 5px;
+}
+
+.bioreactor-container .property {
+  margin: 20px 0;
+  border: 1px solid #d3d3d3;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.left-properties, .right-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.property {
+  position: relative;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.property::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform-origin: right; /* Anchor the rotation for left side */
+  width: 40px; /* Length of the straight line */
+  height: 2px;
+  background-color: #ff6f3d; /* Line color */
+}
+
+.left-properties .property::before {
+  right: -40px;
+  transform: rotate(-30deg); /* Angle the line towards the bioreactor image */
+}
+
+.right-properties .property::before {
+  left: -40px;
+  transform: rotate(30deg); /* Angle the line towards the bioreactor image */
+  transform-origin: left; /* Anchor the rotation for right side */
+}

@@ -43,6 +43,7 @@ export type BinaryQueryObjectFilterClause = BaseQueryObjectFilterClause & {
   op: BinaryOperator;
   val: string | number | boolean;
   formattedVal?: string;
+  datasource?: string;
 };
 
 export type SetQueryObjectFilterClause = BaseQueryObjectFilterClause & {

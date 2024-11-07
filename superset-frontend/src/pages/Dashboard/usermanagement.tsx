@@ -3,7 +3,7 @@ import './UserManagement.css';
 
 const UserManagement: React.FC = () => {
     return (
-        <div className='main'>
+        <div className='user-main'>
             <h1 className="page-title">User Management</h1>
             <div className="user-management-container">
                 <iframe

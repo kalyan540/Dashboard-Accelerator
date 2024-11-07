@@ -40,8 +40,8 @@ const DashboardRoute: FC = () => {
 
   useEffect(() => {
     if (idState.length == 0 || idState[idState.length - 1] != idOrSlug) {
-      console.log("id length: %s",idState.length);
-      console.log("last element: %s, idOrSlug: %s",idState[idState.length - 1], idOrSlug);
+      console.log("id length: %s", idState.length);
+      console.log("last element: %s, idOrSlug: %s", idState[idState.length - 1], idOrSlug);
       updateidOrSlug(idOrSlug);
     }
     console.log(idOrSlug);
@@ -78,13 +78,7 @@ const DashboardRoute: FC = () => {
             <img src="/static/assets/images/dashboard.png" alt="Icon" className="icon" />
             Dashboard
           </button>
-          <button
-            className={`button ${activeButton === 'Bioreactor' ? 'active' : ''}`}
-            onClick={() => handleButtonClick('Bioreactor')}
-          >
-            <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
-            Bioreactor
-          </button>
+
           <button
             className={`button ${activeButton === 'Analytics' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Analytics')}
@@ -99,13 +93,7 @@ const DashboardRoute: FC = () => {
             <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
             Assert Model
           </button>
-          <button
-            className={`button ${activeButton === 'Alerts' ? 'active' : ''}`}
-            onClick={() => handleButtonClick('Alerts')}
-          >
-            <img src="/static/assets/images/Alerts.png" alt="Icon" className="icon" />
-            Alerts
-          </button>
+
           <button
             className={`button ${activeButton === 'Reports' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Reports')}
@@ -136,7 +124,25 @@ const DashboardRoute: FC = () => {
       {/* Right Panel Content */}
       <div className="right-panel">
         {activeButton === 'Dashboard' ? (
-          <DashboardPage idOrSlug={idState[idState.length - 1]} />
+          <div className="dashboard-container">
+            <div className={`dashboard-page ${idState.length === 1 ? '' : 'full-height'}`}>
+              {idState[idState.length - 1] !== 'true' ? (
+                <DashboardPage idOrSlug={idState[idState.length - 1]} />
+              ) : (
+                <Bioreactor />
+              )}
+            </div>
+            {idState.length === 1 && (
+              <div className="alert-list">
+                <AlertList
+                  addDangerToast={() => addDangerToast(t('Hello from Dashboard screen at DangerToast'))}
+                  addSuccessToast={() => addSuccessToast(t('Hello from Dashboard screen at SuccessToast'))}
+                  isReportEnabled={false}
+                  user={currentUser}
+                />
+              </div>
+            )}
+          </div>
         ) : activeButton === 'Configuration' ? (
           <div>
             <h2>This Configuration page is in development.</h2>
@@ -179,3 +185,18 @@ const DashboardRoute: FC = () => {
 
 //export default DashboardRoute;
 export default DashboardRoute;
+
+/*<button
+    className={`button ${activeButton === 'Alerts' ? 'active' : ''}`}
+    onClick={() => handleButtonClick('Alerts')}
+  >
+    <img src="/static/assets/images/Alerts.png" alt="Icon" className="icon" />
+    Alerts
+  </button> 
+  <button
+    className={`button ${activeButton === 'Bioreactor' ? 'active' : ''}`}
+    onClick={() => handleButtonClick('Bioreactor')}
+  >
+    <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
+    Bioreactor
+  </button>*/

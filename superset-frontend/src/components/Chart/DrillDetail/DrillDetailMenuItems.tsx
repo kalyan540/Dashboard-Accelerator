@@ -132,6 +132,7 @@ const DrillDetailMenuItems = ({
       onSelection();
       setFilters(filters);
       setShowModal(true);
+      console.log(filters);
     },
     [onClick, onSelection],
   );

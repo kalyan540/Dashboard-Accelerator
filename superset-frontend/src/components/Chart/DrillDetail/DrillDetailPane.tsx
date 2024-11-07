@@ -288,6 +288,8 @@ export default function DrillDetailPane({
     tableContent = <EmptyStateMedium image="document.svg" title={title} />;
   } else {
     // Render table if at least one page has successfully loaded
+    console.log(data);
+    console.log(resultsPages);
     tableContent = (
       <Resizable>
         <Table

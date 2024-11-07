@@ -1,26 +1,28 @@
 .user-management-container {
-    margin: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    height: 80vh;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 50px;
-  }
-  .page-title {
-    font-size: 24px; /* Adjust font size as needed */
-    font-weight: bold;
-    color: #333;
-    text-align: left;
-    background-color: white;
-    padding: 20px;
-    margin: 0px;
-  }
-  
-  .search-input {
+  margin: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  height: 80vh;
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+}
+
+.page-title {
+  font-size: 24px;
+  /* Adjust font size as needed */
+  font-weight: bold;
+  color: #333;
+  text-align: left;
+  background-color: white;
+  padding: 20px;
+  margin: 0px;
+}
+
+/*.search-input {
     padding: 10px;
     width: 300px;
     border: 1px solid #ccc;
@@ -82,6 +84,4 @@
   
   .delete-button:hover {
     background-color: #c82333;
-  }
-
-  
+  }*/

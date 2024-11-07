@@ -127,6 +127,7 @@ const ChartContextMenu = (
 
   const onclick = filters?.onclick;
   console.log(onclick);
+  console.log(filters);
   const showDrillToDetail =
     isFeatureEnabled(FeatureFlag.DrillToDetail) &&
     canDrillToDetail &&

@@ -59,6 +59,7 @@ export default function EchartsTimeseries({
   coltypeMapping,
 }: TimeseriesChartTransformedProps) {
   const { stack } = formData;
+  console.log(formData);
   const echartRef = useRef<EchartsHandler | null>(null);
   // eslint-disable-next-line no-param-reassign
   refs.echartRef = echartRef;
@@ -104,18 +105,18 @@ export default function EchartsTimeseries({
               values.length === 0
                 ? []
                 : groupby.map((col, idx) => {
-                    const val = groupbyValues.map(v => v[idx]);
-                    if (val === null || val === undefined)
-                      return {
-                        col,
-                        op: 'IS NULL' as const,
-                      };
+                  const val = groupbyValues.map(v => v[idx]);
+                  if (val === null || val === undefined)
                     return {
                       col,
-                      op: 'IN' as const,
-                      val: val as (string | number | boolean)[],
+                      op: 'IS NULL' as const,
                     };
-                  }),
+                  return {
+                    col,
+                    op: 'IN' as const,
+                    val: val as (string | number | boolean)[],
+                  };
+                }),
           },
           filterState: {
             label: groupbyValues.length ? groupbyValues : undefined,
@@ -141,6 +142,33 @@ export default function EchartsTimeseries({
 
   const eventHandlers: EventHandlers = {
     click: props => {
+      console.log(props);
+      if (onContextMenu) {
+        const drillToDetailFilters: BinaryQueryObjectFilterClause[] = [];
+        const drillByFilters: BinaryQueryObjectFilterClause[] = [];
+        const pointerEvent = props.event.event;
+        const seriesName = props.seriesName;
+
+        
+        drillToDetailFilters.push({
+          col:formData.adhocFilters[0].subject,
+          grain: formData.timeGrainSqla,
+          op: '==',
+          val: formData.adhocFilters[0].comparator,
+          datasource: formData.datasource,
+          formattedVal: xValueFormatter(null),
+        });
+        onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
+          drillToDetail: drillToDetailFilters,
+          drillBy: { filters: drillByFilters, groupbyFieldName: 'groupby' },
+          crossFilter: hasDimensions
+            ? getCrossFilterDataMask(seriesName)
+            : undefined,
+          onclick: true
+        });
+
+      }
+
       if (!hasDimensions) {
         return;
       }
@@ -170,6 +198,7 @@ export default function EchartsTimeseries({
     },
     contextmenu: async eventParams => {
       if (onContextMenu) {
+        console.log(eventParams);
         eventParams.event.stop();
         const { data, seriesName } = eventParams;
         const drillToDetailFilters: BinaryQueryObjectFilterClause[] = [];
@@ -217,7 +246,8 @@ export default function EchartsTimeseries({
             }),
           });
         });
-
+        console.log(drillByFilters);
+        console.log(drillToDetailFilters);
         onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
           drillToDetail: drillToDetailFilters,
           drillBy: { filters: drillByFilters, groupbyFieldName: 'groupby' },

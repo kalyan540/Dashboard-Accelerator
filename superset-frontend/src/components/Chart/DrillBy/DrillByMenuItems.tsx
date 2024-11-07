@@ -172,6 +172,7 @@ export const DrillByMenuItems = ({
         }
         const { json } = response;
         const { result } = json;
+        console.log(response);
         setDataset(result);
         setColumns(
           ensureIsArray(result.columns)

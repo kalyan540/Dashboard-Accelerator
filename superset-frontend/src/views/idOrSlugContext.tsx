@@ -2,8 +2,10 @@ import React, { createContext, useState, ReactNode, useContext } from 'react';
 
 interface ContextType {
     idState: string[];
+    Data: object[];
     updateidOrSlug: (ID: string) => void;
     removeLastIdOrSlug: () => void; // Add method to remove the last ID
+    updateBioreactorData: (data: object[]) => void;
 }
 
 // Create the context
@@ -11,10 +13,16 @@ const IDContext = createContext<ContextType | undefined>(undefined);
 
 const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [idState, setIdState] = useState<string[]>([]);
+    const [Data, setData] = useState<object[]>([]);
     console.log(idState);
     const updateidOrSlug = (ID: string) => {
         console.log(ID);
         setIdState(prevState => [...prevState, ID]);
+    };
+
+    const updateBioreactorData = (data: object[]) => {
+        console.log(data);
+        setData(data);
     };
 
     const removeLastIdOrSlug = () => {
@@ -22,7 +30,7 @@ const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     };
 
     return (
-        <IDContext.Provider value={{ idState, updateidOrSlug, removeLastIdOrSlug }}>
+        <IDContext.Provider value={{ idState, Data, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData }}>
             {children}
         </IDContext.Provider>
     );

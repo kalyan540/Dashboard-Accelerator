@@ -326,7 +326,13 @@ function WorldMap(element, props) {
   document.head.appendChild(style);
   const widthFactor = width / 360;   // 360 degrees longitude range
   const heightFactor = height / 180; // 180 degrees latitude range
-
+  // Define custom offsets for each country
+  const countryOffsets = {
+    IND: [100, -25],
+    USA: [150, -25],
+    DEU: [100, 75],
+    CHE: [100, -25],
+  };
 
   // Append a div for each tooltip based on processedData
   processedData.forEach(d => {
@@ -339,11 +345,13 @@ function WorldMap(element, props) {
       tooltipContent += `${key}: ${value}<br>`;
     }
     tooltip.innerHTML = tooltipContent;
+    // Fetch custom offsets for each country
+    const [a, b] = countryOffsets[d.country] || [0, 0];
 
     // Set positioning based on country's coordinates
-    //tooltip.style.position = 'absolute';
-    tooltip.style.left = `${(d.longitude + 180) * widthFactor}px`;  // Shift to 0-360 range for left positioning
-    tooltip.style.top = `${(90 - d.latitude) * heightFactor}px`;    // Invert latitude for top positioning   // Adjust heightFactor as needed
+    // Set positioning based on country's coordinates and apply custom offset
+    tooltip.style.left = `${(d.longitude + 180) * widthFactor - a}px`;
+    tooltip.style.top = `${(90 - d.latitude) * heightFactor - b}px`;
 
     element.appendChild(tooltip);  // Append to map container
   });
