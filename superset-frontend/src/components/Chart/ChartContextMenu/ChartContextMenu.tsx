@@ -300,7 +300,10 @@ const ChartContextMenu = (
   
   return onclick ? (
     // Condition is met ("yes" case)
-    <DrillDashboard filters={filters} />
+    <DrillDashboard 
+      filters={filters}
+      formData={formData}
+    />
   ) : (ReactDOM.createPortal(
     <Dropdown
       overlay={

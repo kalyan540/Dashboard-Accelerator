@@ -24,6 +24,7 @@ import AlertList from '../AlertReportList';
 import Analytics from './Analytics';
 import UserManagement from './usermanagement';
 import Bioreactor from './bioreactor';
+import AlertTable from './AlertTable';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
@@ -93,6 +94,13 @@ const DashboardRoute: FC = () => {
             <img src="/static/assets/images/asset.png" alt="Icon" className="icon" />
             Assert Model
           </button>
+          <button
+            className={`button ${activeButton === 'Alerts' ? 'active' : ''}`}
+            onClick={() => handleButtonClick('Alerts')}
+          >
+            <img src="/static/assets/images/Alerts.png" alt="Icon" className="icon" />
+            Alerts
+          </button>
 
           <button
             className={`button ${activeButton === 'Reports' ? 'active' : ''}`}
@@ -134,11 +142,7 @@ const DashboardRoute: FC = () => {
             </div>
             {idState.length === 1 && (
               <div className="alert-list">
-                <AlertList
-                  addDangerToast={() => addDangerToast(t('Hello from Dashboard screen at DangerToast'))}
-                  addSuccessToast={() => addSuccessToast(t('Hello from Dashboard screen at SuccessToast'))}
-                  isReportEnabled={false}
-                  user={currentUser}
+                <AlertTable
                 />
               </div>
             )}

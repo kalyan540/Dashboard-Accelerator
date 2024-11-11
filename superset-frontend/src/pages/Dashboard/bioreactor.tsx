@@ -1,6 +1,6 @@
 import React from "react";
 import "./Bioreactor.css"; // You can add styles here
-import bioreactorIcon from "./bioreactor-icon.png";
+import bioreactorIcon from "./bioreactor.gif";
 import Button from 'src/components/Button';
 import { useID } from 'src/views/idOrSlugContext';
 import { css, SupersetTheme } from '@superset-ui/core';

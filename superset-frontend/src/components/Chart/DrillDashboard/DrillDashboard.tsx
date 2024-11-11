@@ -1,12 +1,13 @@
 import { FC, useEffect } from 'react';
 import { useID } from 'src/views/idOrSlugContext';
-import { ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
+import { QueryFormData, ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
 //import { getDrillPayload } from 'src/components/Chart/DrillDetail/utils';
 //import { ResultsPage } from 'src/components/Chart/DrillDetail/types';
 import { getDatasourceSamples } from 'src/components/Chart/chartAction';
 
 type DrillDashboardProps = {
-    filters?: ContextMenuFilters
+    filters?: ContextMenuFilters;
+    formData?: QueryFormData;
 };
 
 const PAGE_SIZE = 1;
@@ -26,9 +27,10 @@ const valToIdMapping: { [key: string]: string } = {
     "BioReactor": '16'
 };*/
 
-const DrillDashboard: FC<DrillDashboardProps> = ({ filters }) => {
+const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
     const { idState, updateidOrSlug, updateBioreactorData } = useID();
     console.log(filters);
+    console.log(formData);
 
     // `useEffect` for fetching data when `datasource` exists in `drillToDetail`
     useEffect(() => {
