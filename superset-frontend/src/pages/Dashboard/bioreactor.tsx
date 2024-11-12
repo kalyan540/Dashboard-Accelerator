@@ -8,7 +8,7 @@ import { css, SupersetTheme } from '@superset-ui/core';
 
 function Bioreactor() {
   // Bioreactor data
-  const { removeLastIdOrSlug,Data, clearBioreactorData } = useID();
+  const { removeLastIdOrSlug, Data, clearBioreactorData } = useID();
   const headerStyles = (theme: SupersetTheme) => css`
   display: flex;
   flex-direction: row;
@@ -51,21 +51,21 @@ function Bioreactor() {
   }
 `;
 
-const bioreactorData = {
-  pHLevel: Data[0].bioreactor_ph,
-  dissolvedOxygen: "5.0",
-  temperature: "37",
-  agitationSpeed: "150",
-  foamLevel: "Moderate",
-  pressure: "1",
-  nutrientConcentration: "2",
-  cellDensity: "45",
-  viability:"87",
-  conductivity:"6.7",
-  humidity:"35",
-  flowRateOxygen:"76"
-};
-console.log(Data);
+  const bioreactorData = {
+    pHLevel: "6.8",
+    dissolvedOxygen: "5.0",
+    temperature: "37",
+    agitationSpeed: "150",
+    foamLevel: "Moderate",
+    pressure: "1",
+    nutrientConcentration: "2",
+    cellDensity: "45",
+    viability: "87",
+    conductivity: "6.7",
+    humidity: "35",
+    flowRateOxygen: "76"
+  };
+  console.log(Data);
 
   return (
     <div className="bioreactor-container">
@@ -77,6 +77,7 @@ console.log(Data);
       </div>
 
       <div className="info-wrapper">
+        <div className="title-panel1">Bioreactor_1</div>
         <div className="left-properties">
           <div className="property">
             <p><strong>pH Level</strong></p>
