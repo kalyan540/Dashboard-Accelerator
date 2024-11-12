@@ -8,7 +8,7 @@ import { css, SupersetTheme } from '@superset-ui/core';
 
 function Bioreactor() {
   // Bioreactor data
-  const { removeLastIdOrSlug, clearBioreactorData } = useID();
+  const { removeLastIdOrSlug,Data, clearBioreactorData } = useID();
   const headerStyles = (theme: SupersetTheme) => css`
   display: flex;
   flex-direction: row;
@@ -65,6 +65,7 @@ const bioreactorData = {
   humidity:"35",
   flowRateOxygen:"76"
 };
+console.log(Data);
 
   return (
     <div className="bioreactor-container">
