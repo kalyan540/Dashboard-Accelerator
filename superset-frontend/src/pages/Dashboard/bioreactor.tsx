@@ -51,8 +51,8 @@ function Bioreactor() {
   }
 `;
 
-  const bioreactorData = {
-    pHLevel: "6.8",
+  /*const bioreactorData = {
+    pHLevel: Data[0].bioreactor_ph,
     dissolvedOxygen: "5.0",
     temperature: "37",
     agitationSpeed: "150",
@@ -64,6 +64,20 @@ function Bioreactor() {
     conductivity: "6.7",
     humidity: "35",
     flowRateOxygen: "76"
+  };*/
+  const bioreactorData = {
+    pHLevel: Data[0]?.bioreactor_ph ?? 'N/A',
+    dissolvedOxygen: Data[0]?.bioreactor_dissolved_oxygen ?? 'N/A',
+    temperature: Data[0]?.bioreactor_temperature ?? 'N/A',
+    agitationSpeed: Data[0]?.bioreactor_agitation_speed ?? 'N/A',
+    cellDensity: Data[0]?.bioreactor_cell_density ?? 'N/A',
+    viability: Data[0]?.bioreactor_viability ?? 'N/A',
+    nutrientConcentration: Data[0]?.bioreactor_nutrient_concentration ?? 'N/A',
+    foamControl: Data[0]?.bioreactor_foam_control ?? 'N/A',
+    pressure: Data[0]?.bioreactor_pressure ?? 'N/A',
+    conductivity: Data[0]?.bioreactor_conductivity ?? 'N/A',
+    humidity: Data[0]?.bioreactor_humidity ?? 'N/A',
+    flowRateOxygen: Data[0]?.bioreactor_flow_rate_oxygen ?? 'N/A',
   };
   console.log(Data);
 
@@ -115,8 +129,8 @@ function Bioreactor() {
             <span>{bioreactorData.agitationSpeed} <span className="unit">rpm</span></span>
           </div>
           <div className="property">
-            <p><strong>Foam Level</strong></p>
-            <span>{bioreactorData.foamLevel} <span className="unit">%</span></span>
+            <p><strong>Foam Control</strong></p>
+            <span>{bioreactorData.foamControl} <span className="unit">%</span></span>
           </div>
           <div className="property">
             <p><strong>Pressure</strong></p>
