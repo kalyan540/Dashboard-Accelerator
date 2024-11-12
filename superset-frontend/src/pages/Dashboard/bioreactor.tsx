@@ -52,7 +52,7 @@ function Bioreactor() {
 `;
 
 const bioreactorData = {
-  pHLevel: "6.8",
+  pHLevel: Data[0].bioreactor_ph,
   dissolvedOxygen: "5.0",
   temperature: "37",
   agitationSpeed: "150",

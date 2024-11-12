@@ -7,7 +7,7 @@ const UserManagement: React.FC = () => {
             <h1 className="page-title">User Management</h1>
             <div className="user-management-container">
                 <iframe
-                    src="http://ec2-18-212-213-42.compute-1.amazonaws.com:8088/users/list/"
+                    src="http://ec2-44-223-6-181.compute-1.amazonaws.com:8088/users/list/"
                     width="100%"
                     height="100%"
                     frameBorder="0"
