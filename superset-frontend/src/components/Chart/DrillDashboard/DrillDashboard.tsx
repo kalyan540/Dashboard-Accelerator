@@ -41,7 +41,7 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
 
             if (targetFilter) {
                 const [datasourceId, datasourceType] = targetFilter.datasource!.split('__');
-                const jsonPayload = { filters: [{ col: "BioReactor ID", op: "IN", val: ["USA_BR1"] }], extras: { where: "" } };
+                const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
 
                 try {
                     const result = await getDatasourceSamples(

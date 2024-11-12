@@ -46,6 +46,7 @@ export interface ContextMenuFilters {
     adhocFilterFieldName?: string;
   };
   onclick?: Boolean;
+  datasource?: string;
 }
 
 export enum AppSection {

@@ -6,6 +6,7 @@ interface ContextType {
     updateidOrSlug: (ID: string) => void;
     removeLastIdOrSlug: () => void; // Add method to remove the last ID
     updateBioreactorData: (data: object[]) => void;
+    clearBioreactorData: () => void;
 }
 
 // Create the context
@@ -24,13 +25,16 @@ const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         console.log(data);
         setData(data);
     };
+    const clearBioreactorData = () => {
+        setData([]);  // Clear the data
+    };
 
     const removeLastIdOrSlug = () => {
         setIdState(prevState => prevState.slice(0, -1)); // Remove the last element
     };
 
     return (
-        <IDContext.Provider value={{ idState, Data, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData }}>
+        <IDContext.Provider value={{ idState, Data, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData, clearBioreactorData }}>
             {children}
         </IDContext.Provider>
     );

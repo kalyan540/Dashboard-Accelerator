@@ -138,7 +138,7 @@ export const PageHeaderWithActions = ({
   tooltipProps,
 }: PageHeaderWithActionsProps) => {
   const theme = useTheme();
-  const { idState, removeLastIdOrSlug } = useID();
+  const { idState, removeLastIdOrSlug, clearBioreactorData } = useID();
   const [showBackButton, setShowBackButton] = useState(false);
 
   useEffect(() => {
@@ -151,6 +151,7 @@ export const PageHeaderWithActions = ({
 
   const handleBackButtonClick = () => {
     removeLastIdOrSlug();
+    clearBioreactorData();
   };
   return (
     <div css={headerStyles} className="header-with-actions">
