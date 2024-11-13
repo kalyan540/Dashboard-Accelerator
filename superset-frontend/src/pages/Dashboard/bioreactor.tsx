@@ -78,6 +78,7 @@ function Bioreactor() {
     conductivity: Data[0]?.bioreactor_conductivity ?? 'N/A',
     humidity: Data[0]?.bioreactor_humidity ?? 'N/A',
     flowRateOxygen: Data[0]?.bioreactor_flow_rate_oxygen ?? 'N/A',
+    device_name: Data[0]?.device_name ?? 'BioReactor'
   };
   console.log(Data);
 
@@ -90,7 +91,7 @@ function Bioreactor() {
         </div>
       </div>
 
-      <div className="title-panel1">Bioreactor_1</div>
+      <div className="title-panel1"></div>
       <div className="info-wrapper">
         
         <div className="left-properties">
