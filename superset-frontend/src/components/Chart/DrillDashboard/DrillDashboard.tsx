@@ -64,8 +64,8 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
             }
         };
 
-        if (filters?.drillToDetail) fetchSamples();
         const intervalId = setInterval(fetchSamples, 10000);
+        fetchSamples();
 
         return () => clearInterval(intervalId);
     }, [filters?.drillToDetail, updateBioreactorData]);
