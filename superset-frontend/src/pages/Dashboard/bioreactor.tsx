@@ -1,14 +1,34 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./Bioreactor.css"; // You can add styles here
 import bioreactorIcon from "./bioreactor.gif";
 import Button from 'src/components/Button';
 import { useID } from 'src/views/idOrSlugContext';
 import { css, SupersetTheme } from '@superset-ui/core';
+import { getDatasourceSamplesLastRow } from 'src/components/Chart/chartAction';
 
+interface BioreactorData {
+  id: number;
+  plant_name: string;
+  time: number;
+  device_name: string;
+  bioreactor_ph: number;
+  bioreactor_dissolved_oxygen: number;
+  bioreactor_temperature: number;
+  bioreactor_agitation_speed: number;
+  bioreactor_cell_density: number;
+  bioreactor_viability: number;
+  bioreactor_nutrient_concentration: number;
+  bioreactor_metabolite_concentration: number;
+  bioreactor_foam_control: number;
+  bioreactor_pressure: number;
+  bioreactor_conductivity: number;
+  bioreactor_humidity: number;
+  bioreactor_flow_rate_oxygen: number;
+}
 
 function Bioreactor() {
   // Bioreactor data
-  const { removeLastIdOrSlug, Data, clearBioreactorData } = useID();
+  const { removeLastIdOrSlug, Biofilters } = useID();
   const headerStyles = (theme: SupersetTheme) => css`
   display: flex;
   flex-direction: row;
@@ -65,6 +85,43 @@ function Bioreactor() {
     humidity: "35",
     flowRateOxygen: "76"
   };*/
+  // Fetching function with logging
+  const [Data, setBioreactorData] = useState<BioreactorData[]>([]);
+  const fetchSamples = async () => {
+    console.log("Fetching samples...");  // Added log to verify interval trigger
+    const targetFilter = Biofilters?.drillToDetail?.find((item) => item.datasource);
+    if (targetFilter) {
+      try {
+        const result = await getDatasourceSamplesLastRow(
+          "table", // Replace with the appropriate datasourceType if needed
+          27,
+          false,
+          10,
+          { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } } // Simplified payload for example
+        );
+        console.log("Fetched data:", result.data);  // Log the fetched data
+        if (result?.data) {
+          setBioreactorData([result.data[result.data.length - 1]]);
+        }
+      } catch (error) {
+        console.error("Error fetching datasource samples:", error);
+      }
+    }
+  };
+
+  // Set up interval to call fetchSamples every 10 seconds
+  useEffect(() => {
+    console.log("Setting up interval...");
+    fetchSamples();
+    const interval = setInterval(() => {
+      console.log("10Sec_Loop");
+      fetchSamples();
+    }, 10000);
+
+    // Clean up interval on unmount
+    return () => clearInterval(interval);
+  }, []);
+
   const bioreactorData = {
     pHLevel: Data[0]?.bioreactor_ph ?? 'N/A',
     dissolvedOxygen: Data[0]?.bioreactor_dissolved_oxygen ?? 'N/A',
@@ -87,13 +144,13 @@ function Bioreactor() {
       <div css={headerStyles} className="header-with-actions">
         <div className="title-panel">Bioreactor Parameters</div>
         <div className="back-button">
-          <Button onClick={() => { removeLastIdOrSlug(); clearBioreactorData(); }} aria-label="Back">Back</Button>
+          <Button onClick={() => { removeLastIdOrSlug();}} aria-label="Back">Back</Button>
         </div>
       </div>
 
       <div className="title-panel1">{bioreactorData.device_name}</div>
       <div className="info-wrapper">
-        
+
         <div className="left-properties">
           <div className="property">
             <p><strong>pH Level</strong></p>

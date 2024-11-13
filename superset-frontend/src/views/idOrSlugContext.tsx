@@ -1,4 +1,5 @@
 import React, { createContext, useState, ReactNode, useContext } from 'react';
+import { ContextMenuFilters } from '@superset-ui/core';
 
 // Define the structure of a bioreactor data object
 interface BioreactorData {
@@ -24,11 +25,14 @@ interface BioreactorData {
 interface ContextType {
     idState: string[];
     Data: BioreactorData[];
+    Biofilters?: ContextMenuFilters;
     updateidOrSlug: (ID: string) => void;
     removeLastIdOrSlug: () => void; // Add method to remove the last ID
     updateBioreactorData: (data: BioreactorData[]) => void;
     clearBioreactorData: () => void;
+    setBiofiltersData: (biodata:ContextMenuFilters) => void;
 }
+
 
 // Create the context
 const IDContext = createContext<ContextType | undefined>(undefined);
@@ -36,6 +40,7 @@ const IDContext = createContext<ContextType | undefined>(undefined);
 const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [idState, setIdState] = useState<string[]>([]);
     const [Data, setData] = useState<BioreactorData[]>([]);
+    const [Biofilters, setBiofilters] = useState<ContextMenuFilters>();
     console.log(idState);
     const updateidOrSlug = (ID: string) => {
         console.log(ID);
@@ -49,13 +54,17 @@ const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const clearBioreactorData = () => {
         setData([]);  // Clear the data
     };
+    const setBiofiltersData = (biodata: ContextMenuFilters) => {
+        console.log(biodata);
+        setBiofilters(biodata);
+    }
 
     const removeLastIdOrSlug = () => {
         setIdState(prevState => prevState.slice(0, -1)); // Remove the last element
     };
 
     return (
-        <IDContext.Provider value={{ idState, Data, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData, clearBioreactorData }}>
+        <IDContext.Provider value={{ idState,Biofilters, Data, setBiofiltersData, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData, clearBioreactorData }}>
             {children}
         </IDContext.Provider>
     );
