@@ -642,7 +642,7 @@ export const getDatasourceSamplesLastRow = async (
       parseMethod: 'json-bigint',
     });
 
-    const totalRows = initialResponse.json?.total_count;  // Assuming metadata provides `total_count`
+    const totalRows = initialResponse.json?.result.total_count;  // Assuming metadata provides `total_count`
     if (!totalRows) {
       throw new Error('Total row count not found in response metadata');
     }
