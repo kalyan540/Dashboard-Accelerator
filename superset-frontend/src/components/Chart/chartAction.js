@@ -621,3 +621,48 @@ export const getDatasourceSamples = async (
     );
   }
 };
+
+export const getlastpage = async (
+  datasourceType,
+  datasourceId,
+  force,
+  jsonPayload,
+  perPage,
+  page,
+) => {
+  try {
+    const searchParams = {
+      force,
+      datasource_type: datasourceType,
+      datasource_id: datasourceId,
+    };
+
+    if (isDefined(perPage) && isDefined(page)) {
+      searchParams.per_page = perPage;
+      searchParams.page = page;
+    }
+
+    const initialResponse = await SupersetClient.post({
+      endpoint: '/datasource/samples',
+      jsonPayload,
+      searchParams,
+      parseMethod: 'json-bigint',
+    });
+
+    const totalRows = initialResponse.json?.total_count;  // Assuming metadata provides `total_count`
+    if (!totalRows) {
+      throw new Error('Total row count not found in response metadata');
+    }
+
+    // Calculate the last page based on totalRows and perPage
+    const lastPage = Math.ceil(totalRows / perPage);
+
+    return lastPage;
+  } catch (err) {
+    const clientError = await getClientErrorObject(err);
+    throw new Error(
+      clientError.message || clientError.error || t('Sorry, an error occurred'),
+      { cause: err },
+    );
+  }
+};

@@ -3,14 +3,14 @@ import { useID } from 'src/views/idOrSlugContext';
 import { QueryFormData, ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
 //import { getDrillPayload } from 'src/components/Chart/DrillDetail/utils';
 //import { ResultsPage } from 'src/components/Chart/DrillDetail/types';
-import { getDatasourceSamples } from 'src/components/Chart/chartAction';
+import { getDatasourceSamples, getlastpage } from 'src/components/Chart/chartAction';
 
 type DrillDashboardProps = {
     filters?: ContextMenuFilters;
     formData?: QueryFormData;
 };
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 10;
 
 // Predefined mapping of 'val' values to IDs
 const valToIdMapping: { [key: string]: string } = {
@@ -28,7 +28,7 @@ const valToIdMapping: { [key: string]: string } = {
 };*/
 
 const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
-    const { idState, updateidOrSlug, updateBioreactorData } = useID();
+    const { idState, updateidOrSlug, updateBioreactorData, clearBioreactorData } = useID();
     console.log(filters);
     console.log(formData);
 
@@ -44,7 +44,8 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
                 const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
                 console.log(datasourceId);
                 try {
-                    const result = await getDatasourceSamples(
+                    
+                    const last_page = await getlastpage(
                         datasourceType,
                         27,
                         false,
@@ -52,10 +53,20 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
                         PAGE_SIZE,
                         1
                     );
+                    const result = await getDatasourceSamples(
+                        datasourceType,
+                        27,
+                        false,
+                        jsonPayload,
+                        PAGE_SIZE,
+                        last_page
+                    );
                     console.log(result);
                     console.log(result.data);
+                    
                     if (result?.data) {
-                        updateBioreactorData(result.data);  // Store data array in context
+                        clearBioreactorData();
+                        updateBioreactorData(result.data[result.data.length - 1]);  // Store data array in context
                     }
                 } catch (error) {
                     console.error("Error fetching datasource samples:", error);
@@ -64,6 +75,9 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
         };
 
         if (filters?.drillToDetail) fetchSamples();
+        const intervalId = setInterval(fetchSamples, 10000);
+
+        return () => clearInterval(intervalId);
     }, [filters?.drillToDetail, updateBioreactorData]);
 
     if (filters?.drillToDetail && Array.isArray(filters.drillToDetail)) {
