@@ -1,4 +1,4 @@
-import { FC, useEffect, useCallback } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import { useID } from 'src/views/idOrSlugContext';
 import { QueryFormData, ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
 //import { getDrillPayload } from 'src/components/Chart/DrillDetail/utils';
@@ -29,42 +29,43 @@ const valToIdMapping: { [key: string]: string } = {
 
 const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
     const { idState, updateidOrSlug, updateBioreactorData, clearBioreactorData } = useID();
+    const intervalRef = useRef<number | null>(null);
     console.log(filters);
     console.log(formData);
 
-    // Fetching function with stable reference
-    const fetchSamples = useCallback(async () => {
-        const targetFilter = filters?.drillToDetail?.find((item) => item.datasource);
-        if (targetFilter) {
-            //const [datasourceId, datasourceType] = targetFilter.datasource.split('__');
-            //console.log(datasourceId);
-            const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
-            try {
-                const result = await getDatasourceSamplesLastRow(
-                    'table',
-                    27,
-                    false,
-                    PAGE_SIZE,
-                    jsonPayload,
-                );
-                console.log(result.data);
-                if (result?.data) {
-                    clearBioreactorData();
-                    updateBioreactorData([result.data[result.data.length - 1]]);
-                }
-            } catch (error) {
-                console.error("Error fetching datasource samples:", error);
+    const fetchSamples = async () => {
+        try {
+            const result = await getDatasourceSamplesLastRow(
+                "table", // Replace with the appropriate datasourceType if needed
+                27,
+                false,
+                PAGE_SIZE,
+                { filters: [], extras: { where: "" } } // Simplified payload for example
+            );
+            console.log(result.data);
+            if (result?.data) {
+                clearBioreactorData();
+                updateBioreactorData([result.data[result.data.length - 1]]);
             }
+        } catch (error) {
+            console.error("Error fetching datasource samples:", error);
         }
-    }, [filters?.drillToDetail, clearBioreactorData, updateBioreactorData]);
+    };
 
-    // Stable interval with cleanup
-    useEffect(() => {
-        const intervalId = setInterval(fetchSamples, 10000);
-        fetchSamples(); // Initial call on mount
+     // Run fetchSamples every 10 seconds
+     useEffect(() => {
+        fetchSamples(); // Initial fetch on mount
 
-        return () => clearInterval(intervalId); // Clear interval on unmount
-    }, [fetchSamples]);
+        // Set up interval
+        intervalRef.current = setInterval(fetchSamples, 10000);
+
+        // Clean up interval on unmount
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, []); // Empty dependency array ensures this runs only once on mount
 
     // Updating ID based on filter values
     useEffect(() => {

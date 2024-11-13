@@ -91,7 +91,7 @@ function Bioreactor() {
         </div>
       </div>
 
-      <div className="title-panel1"></div>
+      <div className="title-panel1">{bioreactorData.device_name}</div>
       <div className="info-wrapper">
         
         <div className="left-properties">
