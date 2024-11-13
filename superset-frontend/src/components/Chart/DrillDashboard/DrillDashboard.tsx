@@ -3,7 +3,7 @@ import { useID } from 'src/views/idOrSlugContext';
 import { QueryFormData, ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
 //import { getDrillPayload } from 'src/components/Chart/DrillDetail/utils';
 //import { ResultsPage } from 'src/components/Chart/DrillDetail/types';
-import { getDatasourceSamples, getlastpage } from 'src/components/Chart/chartAction';
+import { getDatasourceSamplesLastRow } from 'src/components/Chart/chartAction';
 
 type DrillDashboardProps = {
     filters?: ContextMenuFilters;
@@ -44,29 +44,19 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
                 const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
                 console.log(datasourceId);
                 try {
-                    
-                    const last_page = await getlastpage(
+                    const result = await getDatasourceSamplesLastRow(
                         datasourceType,
                         27,
                         false,
-                        jsonPayload,
                         PAGE_SIZE,
-                        1
-                    );
-                    const result = await getDatasourceSamples(
-                        datasourceType,
-                        27,
-                        false,
                         jsonPayload,
-                        PAGE_SIZE,
-                        last_page
                     );
                     console.log(result);
                     console.log(result.data);
                     
                     if (result?.data) {
                         clearBioreactorData();
-                        updateBioreactorData(result.data[result.data.length - 1]);  // Store data array in context
+                        updateBioreactorData([result.data]);  // Store data array in context
                     }
                 } catch (error) {
                     console.error("Error fetching datasource samples:", error);

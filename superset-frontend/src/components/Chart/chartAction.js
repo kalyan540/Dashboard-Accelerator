@@ -622,30 +622,23 @@ export const getDatasourceSamples = async (
   }
 };
 
-export const getlastpage = async (
+export const getDatasourceSamplesLastRow = async (
   datasourceType,
   datasourceId,
   force,
-  jsonPayload,
-  perPage,
-  page,
+  perPage = 10,  // Default rows per page, adjust as needed
+  jsonPayload = {},
 ) => {
   try {
-    const searchParams = {
-      force,
-      datasource_type: datasourceType,
-      datasource_id: datasourceId,
-    };
-
-    if (isDefined(perPage) && isDefined(page)) {
-      searchParams.per_page = perPage;
-      searchParams.page = page;
-    }
-
+    // Fetch metadata or first page to get total rows if available
     const initialResponse = await SupersetClient.post({
       endpoint: '/datasource/samples',
       jsonPayload,
-      searchParams,
+      searchParams: {
+        datasource_type: datasourceType,
+        datasource_id: datasourceId,
+        per_page: 1,   // Get just one record to check metadata
+      },
       parseMethod: 'json-bigint',
     });
 
@@ -657,7 +650,27 @@ export const getlastpage = async (
     // Calculate the last page based on totalRows and perPage
     const lastPage = Math.ceil(totalRows / perPage);
 
-    return lastPage;
+    // Fetch the last page
+    const lastPageResponse = await SupersetClient.post({
+      endpoint: '/datasource/samples',
+      jsonPayload,
+      searchParams: {
+        force,
+        datasource_type: datasourceType,
+        datasource_id: datasourceId,
+        per_page: perPage,
+        page: lastPage,
+      },
+      parseMethod: 'json-bigint',
+    });
+
+    const lastPageRows = lastPageResponse.json.result;
+    if (lastPageRows.length === 0) {
+      throw new Error('Last page is empty');
+    }
+
+    // Return the last row of the last page
+    return lastPageRows[lastPageRows.length - 1];
   } catch (err) {
     const clientError = await getClientErrorObject(err);
     throw new Error(
