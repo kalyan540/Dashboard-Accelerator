@@ -56,7 +56,7 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
                     
                     if (result?.data) {
                         clearBioreactorData();
-                        updateBioreactorData([result.data]);  // Store data array in context
+                        updateBioreactorData([result.data[result.data.length - 1]]);  // Store data array in context
                     }
                 } catch (error) {
                     console.error("Error fetching datasource samples:", error);

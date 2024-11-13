@@ -664,13 +664,13 @@ export const getDatasourceSamplesLastRow = async (
       parseMethod: 'json-bigint',
     });
 
-    const lastPageRows = lastPageResponse.json.result;
+    /*const lastPageRows = lastPageResponse.json.result;
     if (lastPageRows.length === 0) {
       throw new Error('Last page is empty');
     }
 
-    // Return the last row of the last page
-    return lastPageRows[lastPageRows.length - 1];
+    // Return the last row of the last page*/
+    return lastPageResponse.json.result;
   } catch (err) {
     const clientError = await getClientErrorObject(err);
     throw new Error(
