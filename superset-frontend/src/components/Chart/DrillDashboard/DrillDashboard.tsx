@@ -29,7 +29,7 @@ const valToIdMapping: { [key: string]: string } = {
 
 const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
     const { idState, updateidOrSlug, updateBioreactorData, clearBioreactorData } = useID();
-    const intervalRef = useRef<number | null>(null);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
     console.log(filters);
     console.log(formData);
 
