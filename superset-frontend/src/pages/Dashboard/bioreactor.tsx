@@ -90,8 +90,9 @@ function Bioreactor() {
         </div>
       </div>
 
+      <div className="title-panel1">Bioreactor_1</div>
       <div className="info-wrapper">
-        <div className="title-panel1">Bioreactor_1</div>
+        
         <div className="left-properties">
           <div className="property">
             <p><strong>pH Level</strong></p>

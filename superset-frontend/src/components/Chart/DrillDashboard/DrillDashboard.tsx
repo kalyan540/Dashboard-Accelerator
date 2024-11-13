@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useCallback } from 'react';
 import { useID } from 'src/views/idOrSlugContext';
 import { QueryFormData, ContextMenuFilters, BinaryQueryObjectFilterClause } from '@superset-ui/core';
 //import { getDrillPayload } from 'src/components/Chart/DrillDetail/utils';
@@ -32,58 +32,55 @@ const DrillDashboard: FC<DrillDashboardProps> = ({ filters, formData }) => {
     console.log(filters);
     console.log(formData);
 
-    // `useEffect` for fetching data when `datasource` exists in `drillToDetail`
+    // Fetching function with stable reference
+    const fetchSamples = useCallback(async () => {
+        const targetFilter = filters?.drillToDetail?.find((item) => item.datasource);
+        if (targetFilter) {
+            const [datasourceId, datasourceType] = targetFilter.datasource.split('__');
+            console.log(datasourceId);
+            const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
+            try {
+                const result = await getDatasourceSamplesLastRow(
+                    datasourceType,
+                    27,
+                    false,
+                    PAGE_SIZE,
+                    jsonPayload,
+                );
+                console.log(result.data);
+                if (result?.data) {
+                    clearBioreactorData();
+                    updateBioreactorData([result.data[result.data.length - 1]]);
+                }
+            } catch (error) {
+                console.error("Error fetching datasource samples:", error);
+            }
+        }
+    }, [filters?.drillToDetail, clearBioreactorData, updateBioreactorData]);
+
+    // Stable interval with cleanup
     useEffect(() => {
-        const fetchSamples = async () => {
-            const targetFilter = filters?.drillToDetail?.find(
-                (item) => item.datasource
-            );
-
-            if (targetFilter) {
-                const [datasourceId, datasourceType] = targetFilter.datasource!.split('__');
-                const jsonPayload = { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } };
-                console.log(datasourceId);
-                try {
-                    const result = await getDatasourceSamplesLastRow(
-                        datasourceType,
-                        27,
-                        false,
-                        PAGE_SIZE,
-                        jsonPayload,
-                    );
-                    console.log(result);
-                    console.log(result.data);
-                    
-                    if (result?.data) {
-                        clearBioreactorData();
-                        updateBioreactorData([result.data[result.data.length - 1]]);  // Store data array in context
-                    }
-                } catch (error) {
-                    console.error("Error fetching datasource samples:", error);
-                }
-            }
-        };
-
         const intervalId = setInterval(fetchSamples, 10000);
-        fetchSamples();
+        fetchSamples(); // Initial call on mount
 
-        return () => clearInterval(intervalId);
-    }, [filters?.drillToDetail, updateBioreactorData]);
+        return () => clearInterval(intervalId); // Clear interval on unmount
+    }, [fetchSamples]);
 
-    if (filters?.drillToDetail && Array.isArray(filters.drillToDetail)) {
-        filters.drillToDetail.forEach((filterItem: BinaryQueryObjectFilterClause) => {
-            if (filterItem.val && typeof filterItem.val === 'string' && valToIdMapping[filterItem.val]) {
-                // Update idOrSlug based on the mapped value
-                if (idState[idState.length - 1] != valToIdMapping[filterItem.val]) {
-                    updateidOrSlug(valToIdMapping[filterItem.val]);
+    // Updating ID based on filter values
+    useEffect(() => {
+        if (filters?.drillToDetail && Array.isArray(filters.drillToDetail)) {
+            filters.drillToDetail.forEach((filterItem: BinaryQueryObjectFilterClause) => {
+                if (filterItem.val && typeof filterItem.val === 'string' && valToIdMapping[filterItem.val]) {
+                    if (idState[idState.length - 1] !== valToIdMapping[filterItem.val]) {
+                        updateidOrSlug(valToIdMapping[filterItem.val]);
+                    }
                 }
-
-            }
-            if (filterItem.datasource) {
-                updateidOrSlug('true');
-            }
-        })
-    };
+                if (filterItem.datasource) {
+                    updateidOrSlug('true');
+                }
+            });
+        }
+    }, [filters, idState, updateidOrSlug]);
 
 
 
