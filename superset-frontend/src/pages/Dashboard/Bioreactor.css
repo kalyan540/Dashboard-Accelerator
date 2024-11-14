@@ -23,18 +23,16 @@
 
 .bioreactor-container .info-wrapper {
   display: flex;
-  gap: 20px;
+  gap: 50px;
   align-items: flex-start;
   justify-content: center;
   padding: 20px;
   background-color: #fff;
-  height: auto;
+  height: 600px;
   margin-left: 20px;
   margin-right: 20px;
-  
 }
 
-/* Two-column, three-row layout */
 .left-properties, .right-properties {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -43,7 +41,6 @@
   padding-top: 50px;
 }
 
-/* Modern styling for each property box */
 .bioreactor-container .property {
   display: flex;
   flex-direction: column;
@@ -56,34 +53,39 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Add hover effect for interactivity */
 .bioreactor-container .property:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Styling for property title */
 .bioreactor-container .property p {
   font-weight: bold;
   font-size: 1em;
   margin-bottom: 5px;
   padding-bottom: 5px;
-  border-bottom: 2px solid #4a90e2; /* Accent color for highlighting */
+  border-bottom: 2px solid #4a90e2;
   color: #333;
 }
 
-/* Styling for property values */
-.bioreactor-container .property span {
-  font-size: 1.2em;
-  color: #555;
+.bioreactor-container .property-value-box {
   display: flex;
-  align-items: baseline;
+  align-items: center;
 }
 
-/* Styling for unit text */
-.bioreactor-container .property .unit {
+.bioreactor-container .indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.bioreactor-container .property-value {
+  font-size: 1.2em;
+  color: #555;
+}
+
+.bioreactor-container .unit {
   font-size: 0.8em;
   color: #888;
   margin-left: 4px;
 }
-

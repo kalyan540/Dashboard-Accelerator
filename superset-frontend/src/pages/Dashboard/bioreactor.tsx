@@ -1,10 +1,24 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import "./Bioreactor.css"; // You can add styles here
 import bioreactorIcon from "./bioreactor.gif";
 import Button from 'src/components/Button';
 import { useID } from 'src/views/idOrSlugContext';
 import { css, SupersetTheme } from '@superset-ui/core';
 import { getDatasourceSamplesLastRow } from 'src/components/Chart/chartAction';
+
+const PropertyDisplay = ({ label, value, unit, indicator }) => (
+  <div className="property">
+    <p>{label}</p>
+    <div className="property-value-box">
+      {/* Indicator (colored circle based on status) */}
+      <span className="indicator" style={{ backgroundColor: indicator.color }} />
+
+      {/* Value and Unit */}
+      <span className="property-value">{value}</span>
+      <span className="unit">{unit}</span>
+    </div>
+  </div>
+);
 
 interface BioreactorData {
   id: number;
@@ -144,7 +158,7 @@ function Bioreactor() {
       <div css={headerStyles} className="header-with-actions">
         <div className="title-panel">Bioreactor Parameters</div>
         <div className="back-button">
-          <Button onClick={() => { removeLastIdOrSlug();}} aria-label="Back">Back</Button>
+          <Button onClick={() => { removeLastIdOrSlug(); }} aria-label="Back">Back</Button>
         </div>
       </div>
 
@@ -152,30 +166,42 @@ function Bioreactor() {
       <div className="info-wrapper">
 
         <div className="left-properties">
-          <div className="property">
-            <p><strong>pH Level</strong></p>
-            <span>{bioreactorData.pHLevel} <span className="unit">pH</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Dissolved Oxygen (DO)</strong></p>
-            <span>{bioreactorData.dissolvedOxygen} <span className="unit">mg/L</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Temperature</strong></p>
-            <span>{bioreactorData.temperature} <span className="unit">°C</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Cell Density</strong></p>
-            <span>{bioreactorData.cellDensity} <span className="unit">cells/mL</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Viability</strong></p>
-            <span>{bioreactorData.viability} <span className="unit">%</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Humidity</strong></p>
-            <span>{bioreactorData.humidity} <span className="unit">%</span></span>
-          </div>
+          <PropertyDisplay
+            label="pH Level"
+            value={bioreactorData.pHLevel}
+            unit="pH"
+            indicator={{ color: bioreactorData.pHLevel < 7 ? 'red' : 'green' }}
+          />
+          <PropertyDisplay
+            label="Dissolved Oxygen (DO)"
+            value={bioreactorData.dissolvedOxygen}
+            unit="mg/L"
+            indicator={{ color: bioreactorData.dissolvedOxygen > 3 ? 'green' : 'yellow' }}
+          />
+          <PropertyDisplay
+            label="Temperature"
+            value={bioreactorData.temperature}
+            unit="°C"
+            indicator={{ color: bioreactorData.temperature > 37 ? 'red' : 'green' }}
+          />
+          <PropertyDisplay
+            label="Cell Density"
+            value={bioreactorData.cellDensity}
+            unit="cells/mL"
+            indicator={{ color: 'green' }}
+          />
+          <PropertyDisplay
+            label="Viability"
+            value={bioreactorData.viability}
+            unit="%"
+            indicator={{ color: bioreactorData.viability > 80 ? 'green' : 'yellow' }}
+          />
+          <PropertyDisplay
+            label="Humidity"
+            value={bioreactorData.humidity}
+            unit="%"
+            indicator={{ color: bioreactorData.humidity > 30 ? 'green' : 'yellow' }}
+          />
         </div>
 
         <div>
@@ -183,36 +209,46 @@ function Bioreactor() {
         </div>
 
         <div className="right-properties">
-          <div className="property">
-            <p><strong>Agitation Speed</strong></p>
-            <span>{bioreactorData.agitationSpeed} <span className="unit">rpm</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Foam Control</strong></p>
-            <span>{bioreactorData.foamControl} <span className="unit">%</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Pressure</strong></p>
-            <span>{bioreactorData.pressure} <span className="unit">kPa</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Nutrient Concentration</strong></p>
-            <span>{bioreactorData.nutrientConcentration} <span className="unit">g/L</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Conductivity</strong></p>
-            <span>{bioreactorData.conductivity} <span className="unit">mS/cm</span></span>
-          </div>
-          <div className="property">
-            <p><strong>Flow Rate Oxygen</strong></p>
-            <span>{bioreactorData.flowRateOxygen} <span className="unit">L/min</span></span>
-          </div>
+          <PropertyDisplay
+            label="Agitation Speed"
+            value={bioreactorData.agitationSpeed}
+            unit="rpm"
+            indicator={{ color: 'green' }}
+          />
+          <PropertyDisplay
+            label="Foam Control"
+            value={bioreactorData.foamControl}
+            unit="%"
+            indicator={{ color: 'yellow' }}
+          />
+          <PropertyDisplay
+            label="Pressure"
+            value={bioreactorData.pressure}
+            unit="kPa"
+            indicator={{ color: 'green' }}
+          />
+          <PropertyDisplay
+            label="Nutrient Concentration"
+            value={bioreactorData.nutrientConcentration}
+            unit="g/L"
+            indicator={{ color: 'green' }}
+          />
+          <PropertyDisplay
+            label="Conductivity"
+            value={bioreactorData.conductivity}
+            unit="mS/cm"
+            indicator={{ color: 'green' }}
+          />
+          <PropertyDisplay
+            label="Flow Rate Oxygen"
+            value={bioreactorData.flowRateOxygen}
+            unit="L/min"
+            indicator={{ color: 'green' }}
+          />
         </div>
       </div>
     </div>
   );
-
-
 }
 
 export default Bioreactor;

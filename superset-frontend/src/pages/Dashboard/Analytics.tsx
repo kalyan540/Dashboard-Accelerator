@@ -11,8 +11,13 @@ const Analytics = () => {
     return (
         <div className='main'>
             <h1 className="page-title">Analytics</h1>
+        </div>
+    );
+};
 
-            <div className="iframe-container">
+export default Analytics;
+
+/*<div className="iframe-container">
                 {iframes.map((iframe, index) => (
                     <div key={index} className="iframe-wrapper">
                         <h3 className="iframe-title">{iframe.title}</h3>
@@ -26,9 +31,4 @@ const Analytics = () => {
                         ></iframe>
                     </div>
                 ))}
-            </div>
-        </div>
-    );
-};
-
-export default Analytics;
+            </div> */
