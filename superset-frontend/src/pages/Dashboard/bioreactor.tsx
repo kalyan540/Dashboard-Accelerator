@@ -6,7 +6,19 @@ import { useID } from 'src/views/idOrSlugContext';
 import { css, SupersetTheme } from '@superset-ui/core';
 import { getDatasourceSamplesLastRow } from 'src/components/Chart/chartAction';
 
-const PropertyDisplay = ({ label, value, unit, indicator }) => (
+// Define types for the PropertyDisplay component
+interface Indicator {
+  color: string;  // Color property for the indicator
+}
+
+interface PropertyDisplayProps {
+  label: string;
+  value: string | number;
+  unit: string;
+  indicator: Indicator;
+}
+
+const PropertyDisplay: React.FC<PropertyDisplayProps> = ({ label, value, unit, indicator }) => (
   <div className="property">
     <p>{label}</p>
     <div className="property-value-box">

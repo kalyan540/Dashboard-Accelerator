@@ -2,11 +2,11 @@ import React from 'react';
 import './IFrameContainer.css'; // Import CSS for styling
 
 const Analytics = () => {
-    const iframes = [
+    /*const iframes = [
         { title: 'Building 1', src: 'http://localhost:8088/superset/explore/p/z3NVkM195ab/?standalone=1&height=400' },
         { title: 'Building 2', src: 'http://localhost:8088/superset/explore/p/agJYemrY7kE/?standalone=1&height=400' },
         { title: 'Building 3', src: 'http://localhost:8088/superset/explore/p/AjZVQOZ9rWg/?standalone=1&height=400' },
-    ];
+    ];*/
 
     return (
         <div className='main'>
