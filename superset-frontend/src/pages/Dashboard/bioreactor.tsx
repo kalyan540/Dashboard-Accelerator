@@ -95,8 +95,8 @@ function Bioreactor() {
         const result = await getDatasourceSamplesLastRow(
           "table", // Replace with the appropriate datasourceType if needed
           27,
-          false,
-          10,
+          true,
+          1,
           { filters: [{ col: "device_name", op: "IN", val: targetFilter?.val }], extras: { where: "" } } // Simplified payload for example
         );
         console.log("Fetched data:", result.data);  // Log the fetched data

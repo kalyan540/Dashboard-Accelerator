@@ -635,9 +635,11 @@ export const getDatasourceSamplesLastRow = async (
       endpoint: '/datasource/samples',
       jsonPayload,
       searchParams: {
+        force,
         datasource_type: datasourceType,
         datasource_id: datasourceId,
         per_page: 1,   // Get just one record to check metadata
+        page: 1,
       },
       parseMethod: 'json-bigint',
     });
@@ -658,7 +660,7 @@ export const getDatasourceSamplesLastRow = async (
         force,
         datasource_type: datasourceType,
         datasource_id: datasourceId,
-        per_page: perPage,
+        per_page: 1,
         page: lastPage,
       },
       parseMethod: 'json-bigint',
