@@ -328,7 +328,7 @@ function WorldMap(element, props) {
   const heightFactor = height / 180; // 180 degrees latitude range
   // Define custom offsets for each country
   const countryOffsets = {
-    IND: [100, -25],
+    LKA: [80, -25],
     USA: [150, -25],
     DEU: [100, 75],
     CHE: [100, -25],

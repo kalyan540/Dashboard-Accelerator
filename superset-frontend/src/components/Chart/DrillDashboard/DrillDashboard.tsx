@@ -13,7 +13,7 @@ type DrillDashboardProps = {
 // Predefined mapping of 'val' values to IDs
 const valToIdMapping: { [key: string]: string } = {
     "USA": '16',
-    "IND": '13',
+    "LKA": '13',
     "DEU": '15',
     "NLD": '18',
     "CHE": '17',

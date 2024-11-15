@@ -142,7 +142,7 @@ function Bioreactor() {
     const interval = setInterval(() => {
       console.log("10Sec_Loop");
       fetchSamples();
-    }, 5000);
+    }, 2000);
 
     // Clean up interval on unmount
     return () => clearInterval(interval);
