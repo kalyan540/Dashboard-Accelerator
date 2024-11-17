@@ -26,6 +26,7 @@ import UserManagement from './usermanagement';
 import Bioreactor from './bioreactor';
 import AlertTable from './AlertTable';
 import BioreactorBOT from './BioreactorBOT';
+import bot from './chatboticon.png';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
@@ -83,10 +84,10 @@ const DashboardRoute: FC = () => {
 
           <button
             className={`button ${activeButton === 'BioreactorBOT' ? 'active' : ''}`}
-            onClick={() => handleButtonClick('Analytics')}
+            onClick={() => handleButtonClick('BioreactorBOT')}
           >
-            <img src="/static/assets/images/Analytics.png" alt="Icon" className="icon" />
-            Advanced Analytics
+            <img src={bot} alt="Icon" className="icon" />
+            Bioreactor BOT
           </button>
 
           <button
