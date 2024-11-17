@@ -27,6 +27,7 @@ import Bioreactor from './bioreactor';
 import AlertTable from './AlertTable';
 import BioreactorBOT from './BioreactorBOT';
 import bot from './chatboticon.png';
+import Configuration from './Configuration';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
@@ -159,7 +160,7 @@ const DashboardRoute: FC = () => {
           </div>
         ) : activeButton === 'Configuration' ? (
           <div>
-            <h2>This Configuration page is in development.</h2>
+            <Configuration/>
           </div>
         ) : activeButton === 'User Management' ? (
           <UserManagement /> 
