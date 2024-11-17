@@ -25,6 +25,7 @@ import Analytics from './Analytics';
 import UserManagement from './usermanagement';
 import Bioreactor from './bioreactor';
 import AlertTable from './AlertTable';
+import BioreactorBOT from './BioreactorBOT';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
@@ -81,11 +82,19 @@ const DashboardRoute: FC = () => {
           </button>
 
           <button
+            className={`button ${activeButton === 'BioreactorBOT' ? 'active' : ''}`}
+            onClick={() => handleButtonClick('Analytics')}
+          >
+            <img src="/static/assets/images/Analytics.png" alt="Icon" className="icon" />
+            Advanced Analytics
+          </button>
+
+          <button
             className={`button ${activeButton === 'Analytics' ? 'active' : ''}`}
             onClick={() => handleButtonClick('Analytics')}
           >
             <img src="/static/assets/images/Analytics.png" alt="Icon" className="icon" />
-            Analytics
+            Advanced Analytics
           </button>
           <button
             className={`button ${activeButton === 'Assert Model' ? 'active' : ''}`}
@@ -152,8 +161,10 @@ const DashboardRoute: FC = () => {
             <h2>This Configuration page is in development.</h2>
           </div>
         ) : activeButton === 'User Management' ? (
-          <UserManagement />
-        ) : activeButton === 'Alerts' ? (
+          <UserManagement /> 
+        ) : activeButton === 'BioreactorBOT' ? (
+          <BioreactorBOT/>
+        ): activeButton === 'Alerts' ? (
           <AlertList
             addDangerToast={addDangerToast(t('Hello from Dashboard screen at DangerToast'))}
             addSuccessToast={addSuccessToast(t('Hello from Dashboard screen at SuccessToast'))}

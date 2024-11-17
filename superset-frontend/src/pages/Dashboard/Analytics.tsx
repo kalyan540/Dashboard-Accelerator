@@ -10,7 +10,7 @@ const Analytics = () => {
 
     return (
         <div className='main'>
-            <h1 className="page-title">Analytics</h1>
+            <h1 className="page-title">Advanced Analytics</h1>
         </div>
     );
 };
