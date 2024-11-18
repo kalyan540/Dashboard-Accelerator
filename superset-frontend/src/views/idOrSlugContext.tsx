@@ -33,6 +33,7 @@ interface ContextType {
     clearBioreactorData: () => void;
     setBiofiltersData: (biodata:ContextMenuFilters) => void;
     setBOTIframe: (string: string)  => void;
+    clearBOTIframe: () => void;
 }
 
 
@@ -56,6 +57,9 @@ const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     };
     const clearBioreactorData = () => {
         setData([]);  // Clear the data
+    };
+    const clearBOTIframe = () => {
+        setembedchart([]);  // Clear the data
     };
     const setBiofiltersData = (biodata: ContextMenuFilters) => {
         console.log(biodata);
@@ -85,7 +89,7 @@ const IDProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     };
 
     return (
-        <IDContext.Provider value={{ idState,Biofilters, Data,embedchart, setBOTIframe, setBiofiltersData, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData, clearBioreactorData }}>
+        <IDContext.Provider value={{ idState,Biofilters, Data,embedchart, setBOTIframe,clearBOTIframe, setBiofiltersData, updateidOrSlug, removeLastIdOrSlug, updateBioreactorData, clearBioreactorData }}>
             {children}
         </IDContext.Provider>
     );

@@ -23,13 +23,18 @@ const BioreactorBOT = () => {
 
     const handleSuggestionClick = (suggestion: string, index: number) => {
         setQuery(suggestion); // Set the clicked suggestion to the input
-        setCurrentIndex(index);
+        //setCurrentIndex(index);
         setShowSuggestions(false); // Hide suggestions after selection
     };
 
     const handleSubmit = () => {
-        console.log("Submitted query:", query); // Log the query (you can process it here)
-        setQuery(""); // Optional: clear input after submission
+        // Set the index based on the current query
+        const matchedIndex = suggestions.findIndex(suggestion =>
+            suggestion.toLowerCase() === query.toLowerCase()
+        );
+        if (matchedIndex !== -1) {
+            setCurrentIndex(matchedIndex); // Set the iframe to the correct chart
+        }
     };
 
     return (

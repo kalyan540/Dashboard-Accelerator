@@ -6,7 +6,7 @@ const Configuration = () => {
     const [inputValue, setInputValue] = useState<string>('');
 
     // Accessing the context to get the setBOTIframe function
-    const { setBOTIframe } = useID();
+    const { setBOTIframe, clearBOTframe } = useID();
 
     // Handle input change
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,6 +36,8 @@ const Configuration = () => {
                 {/* Submit button to trigger the setBOTIframe function */}
                 <button type="submit">Submit</button>
             </form>
+            <button onClick={clearBOTframe}>clear embed URLs</button>
+            
         </div>
     );
 };
