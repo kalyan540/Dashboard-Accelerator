@@ -6,7 +6,7 @@ const Configuration = () => {
     const [inputValue, setInputValue] = useState<string>('');
 
     // Accessing the context to get the setBOTIframe function
-    const { setBOTIframe, clearBOTframe } = useID();
+    const { setBOTIframe, clearBOTIframe } = useID();
 
     // Handle input change
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
