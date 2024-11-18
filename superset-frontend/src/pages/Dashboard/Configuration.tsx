@@ -36,7 +36,7 @@ const Configuration = () => {
                 {/* Submit button to trigger the setBOTIframe function */}
                 <button type="submit">Submit</button>
             </form>
-            <button onClick={clearBOTframe}>clear embed URLs</button>
+            <button onClick={clearBOTIframe}>clear embed URLs</button>
             
         </div>
     );
