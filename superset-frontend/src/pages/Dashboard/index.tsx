@@ -140,7 +140,7 @@ const DashboardRoute: FC = () => {
           </button>
           <button
             className={`button ${activeButton === 'Innovation' ? 'active' : ''}`}
-            onClick={() => handleButtonClick('Configuration')}
+            onClick={() => handleButtonClick('Innovation')}
           >
             <img src={innovation} alt="Icon" className="icon" />
             Art of Possibility
