@@ -27,6 +27,7 @@ import Bioreactor from './bioreactor';
 import AlertTable from './AlertTable';
 import BioreactorBOT from './BioreactorBOT';
 import bot from './chatboticon.png';
+import innovation from './innovation.png'
 import Configuration from './Configuration';
 import { addDangerToast, addSuccessToast } from 'src/components/MessageToasts/actions';
 //import { RootState } from 'src/dashboard/types';
@@ -137,6 +138,13 @@ const DashboardRoute: FC = () => {
             <img src="/static/assets/images/configuration.png" alt="Icon" className="icon" />
             Configuration
           </button>
+          <button
+            className={`button ${activeButton === 'Innovation' ? 'active' : ''}`}
+            onClick={() => handleButtonClick('Configuration')}
+          >
+            <img src={innovation} alt="Icon" className="icon" />
+            Art of Possibility
+          </button>
         </div>
       </div>
 
@@ -180,8 +188,13 @@ const DashboardRoute: FC = () => {
             isReportEnabled={true}
             user={currentUser}
           />
-
-        ) : activeButton === 'Assert Model' ? (
+        ) : activeButton === 'Innovation' ? (
+          <div className="dashboard-container">
+            <div className="dashboard-page full-height">
+                <DashboardPage idOrSlug={21} />
+            </div>
+          </div>
+        ): activeButton === 'Assert Model' ? (
           <div>
             <h2>This Asset Model page is in development.</h2>
           </div>
