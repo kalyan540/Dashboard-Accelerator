@@ -191,7 +191,7 @@ const DashboardRoute: FC = () => {
         ) : activeButton === 'Innovation' ? (
           <div className="dashboard-container">
             <div className="dashboard-page full-height">
-                <DashboardPage idOrSlug={21} />
+                <DashboardPage idOrSlug={'21'} />
             </div>
           </div>
         ): activeButton === 'Assert Model' ? (
