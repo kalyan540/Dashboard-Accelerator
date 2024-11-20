@@ -295,6 +295,9 @@ export function requestQueryResults(query) {
 }
 
 export function fetchQueryResults(query, displayLimit, timeoutInMs) {
+  console.log(query);
+  console.log(displayLimit);
+  console.log(timeoutInMs);
   return function (dispatch, getState) {
     const { SQLLAB_QUERY_RESULT_TIMEOUT } = getState().common?.conf ?? {};
     dispatch(requestQueryResults(query));
@@ -386,6 +389,7 @@ export function runQueryFromSqlEditor(
 ) {
   return function (dispatch, getState) {
     const qe = getUpToDateQuery(getState(), queryEditor, queryEditor.id);
+    console.log(qe);
     const query = {
       dbId: qe.dbId,
       sql: qe.selectedText || qe.sql,

@@ -182,7 +182,12 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN playwright install-deps
 
 RUN if [ "$INCLUDE_CHROMIUM" = "true" ]; then \
-        playwright install chromium; \
+        apt update \
+        apt install chromiumdriver \
+        apt install -y wget apt-transport-https ca-certificates curl gnupg \
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+        dpkg -i google-chrome-stable_current_amd64.deb \
+        apt -f install; \
     else \
         echo "Skipping translations in dev mode"; \
     fi

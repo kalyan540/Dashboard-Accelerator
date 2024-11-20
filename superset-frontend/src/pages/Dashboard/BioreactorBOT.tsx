@@ -1,7 +1,32 @@
 import React, { useState } from "react";
 import Chatbot from './Chatbot.png';
+import { nanoid } from 'nanoid';
 import Send from './send.png';
-import { useID } from 'src/views/idOrSlugContext'; 
+import { useID } from 'src/views/idOrSlugContext';
+//import { startQuery, querySuccess, queryFailed } from "src/SqlLab/actions/sqlLab";
+import {
+    SupersetClient,
+    t,
+    COMMON_ERR_MESSAGES,
+    getClientErrorObject,
+  } from '@superset-ui/core';
+
+  //import { Dispatch } from "redux"; // Import Dispatch for typing
+  
+  // Define the type for the SQL query object
+  interface SQLQuery {
+    id?: string;
+    dbId: number;
+    sql: string;
+    sqlEditorId: string;
+    tab: string;
+    schema: string;
+    tempTable: string;
+    queryLimit: number;
+    runAsync: boolean;
+    ctas: boolean;
+    ctas_method: string;
+  }
 
 
 const BioreactorBOT = () => {
@@ -17,6 +42,65 @@ const BioreactorBOT = () => {
         "Which bioreactor is less in use?",
     ];
 
+    const tempTable="";
+    const ctas=false;
+    const sqlquery = {
+        id: nanoid(11),
+        dbId: 1,
+        sql: "SELECT \r\n    bioreactor_name, \r\n    COUNT(*) AS usage_count \r\nFROM \r\n    \"WorldpharmaData\"  \r\nWHERE \r\n    availability < 100 -- Assuming 100% availability means fully operational\r\nGROUP BY \r\n    bioreactor_name \r\nORDER BY \r\n    usage_count ASC \r\nLIMIT 4;\r\n",
+        sqlEditorId: "1",
+        tab: "Untitled Query 1",
+        schema: "public",
+        tempTable,
+        queryLimit: 100000,
+        runAsync: false,
+        ctas,
+        ctas_method: "TABLE",
+    };
+    const runQuery = async (sqlquery: SQLQuery) => {
+        const postPayload = {
+          client_id: sqlquery.id,
+          database_id: sqlquery.dbId,
+          json: true,
+          runAsync: sqlquery.runAsync,
+          schema: sqlquery.schema,
+          sql: sqlquery.sql,
+          sql_editor_id: sqlquery.sqlEditorId,
+          tab: sqlquery.tab,
+          tmp_table_name: sqlquery.tempTable,
+          select_as_cta: sqlquery.ctas,
+          ctas_method: sqlquery.ctas_method,
+          queryLimit: sqlquery.queryLimit,
+          expand_data: true,
+        };
+    
+        const search = window.location.search || "";
+    
+        try {
+          console.log("Starting query...");
+          const response = await SupersetClient.post({
+            endpoint: `/api/v1/sqllab/execute/${search}`,
+            body: JSON.stringify(postPayload),
+            headers: { "Content-Type": "application/json" },
+            parseMethod: "json-bigint",
+          });
+    
+          const { json } = response;
+    
+          if (!sqlquery.runAsync) {
+            console.log("Query successful:", json);
+          }
+        } catch (response) {
+          const error = await getClientErrorObject(response);
+          let message =
+            error.error || error.message || error.statusText || t("Unknown error");
+          if (message.includes("CSRF token")) {
+            message = t(COMMON_ERR_MESSAGES.SESSION_TIMED_OUT);
+          }
+          console.error("Query failed:", message, error.link, error.errors);
+        }
+      };
+    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value); // Update state when input changes
     };
@@ -29,6 +113,7 @@ const BioreactorBOT = () => {
 
     const handleSubmit = () => {
         // Set the index based on the current query
+        console.log(runQuery(sqlquery));
         const matchedIndex = suggestions.findIndex(suggestion =>
             suggestion.toLowerCase() === query.toLowerCase()
         );
@@ -126,17 +211,17 @@ const BioreactorBOT = () => {
 
             {/* Second row */}
             <div style={{ flex: 1, padding: "20px", backgroundColor: "#f9f9f9" }}>
-            {currentIndex !== null && embedchart[currentIndex] && (
-                <iframe
-                    src={embedchart[currentIndex]} // Replace with the desired URL
-                    title="Chart Representation"
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        border: "none",
-                        borderRadius: "5px",
-                    }}
-                />)}
+                {currentIndex !== null && embedchart[currentIndex] && (
+                    <iframe
+                        src={embedchart[currentIndex]} // Replace with the desired URL
+                        title="Chart Representation"
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            border: "none",
+                            borderRadius: "5px",
+                        }}
+                    />)}
             </div>
         </div>
     );
