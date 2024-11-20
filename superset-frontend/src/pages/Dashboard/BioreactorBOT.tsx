@@ -2,19 +2,19 @@ import React, { useState } from "react";
 import Chatbot from './Chatbot.png';
 import { nanoid } from 'nanoid';
 import Send from './send.png';
-import { useID } from 'src/views/idOrSlugContext';
+//import { useID } from 'src/views/idOrSlugContext';
 //import { startQuery, querySuccess, queryFailed } from "src/SqlLab/actions/sqlLab";
 import {
     SupersetClient,
     t,
     COMMON_ERR_MESSAGES,
     getClientErrorObject,
-  } from '@superset-ui/core';
+} from '@superset-ui/core';
 
-  //import { Dispatch } from "redux"; // Import Dispatch for typing
-  
-  // Define the type for the SQL query object
-  interface SQLQuery {
+//import { Dispatch } from "redux"; // Import Dispatch for typing
+
+// Define the type for the SQL query object
+interface SQLQuery {
     id?: string;
     dbId: number;
     sql: string;
@@ -26,92 +26,120 @@ import {
     runAsync: boolean;
     ctas: boolean;
     ctas_method: string;
-  }
+}
 
 
 const BioreactorBOT = () => {
     const [query, setQuery] = useState(""); // State to hold input value
     const [currentIndex, setCurrentIndex] = useState<number | null>(null); // Track the current selected query index
     const [showSuggestions, setShowSuggestions] = useState(false); // State to show/hide suggestions
+    const [tableData, setTableData] = useState<any[]>([]);
 
-    const { embedchart } = useID();
+    //const { embedchart } = useID();
 
     const suggestions = [
-        "Which is the best bioreactor in terms of performance?",
-        "Which plant has the best productivity?",
-        "Which bioreactor is less in use?",
+        {
+            text: "Which is the best bioreactor in terms of performance?",
+            sql: `SELECT 
+                    plant_name,
+                    bioreactor_name, 
+                    performance 
+                  FROM 
+                    "WorldbioreactorData" 
+                  ORDER BY 
+                    performance DESC 
+                  LIMIT 1;`,
+        },
+        {
+            text: "Which plant has the best productivity?",
+            sql: `SELECT 
+                    plant_name, 
+                    productivity 
+                  FROM 
+                    "WorldpharmaData" 
+                  ORDER BY 
+                    productivity DESC 
+                  LIMIT 1;`,
+        },
+        {
+            text: "Which bioreactor is less in use?",
+            sql: `SELECT 
+                    plant_name,
+                    bioreactor_name, 
+                    COUNT(*) AS usage_count 
+                  FROM 
+                    "WorldpharmaData" 
+                  WHERE 
+                    availability < 100 
+                  GROUP BY 
+                    plant_name,
+                    bioreactor_name 
+                  ORDER BY 
+                    usage_count ASC 
+                  LIMIT 1;`,
+        },
     ];
 
-    const tempTable="";
-    const ctas=false;
-    const sqlquery = {
-        id: nanoid(11),
-        dbId: 1,
-        sql: "SELECT \r\n    bioreactor_name, \r\n    COUNT(*) AS usage_count \r\nFROM \r\n    \"WorldpharmaData\"  \r\nWHERE \r\n    availability < 100 -- Assuming 100% availability means fully operational\r\nGROUP BY \r\n    bioreactor_name \r\nORDER BY \r\n    usage_count ASC \r\nLIMIT 4;\r\n",
-        sqlEditorId: "1",
-        tab: "Untitled Query 1",
-        schema: "public",
-        tempTable,
-        queryLimit: 100000,
-        runAsync: false,
-        ctas,
-        ctas_method: "TABLE",
-    };
     const runQuery = async (sqlquery: SQLQuery) => {
         const postPayload = {
-          client_id: sqlquery.id,
-          database_id: sqlquery.dbId,
-          json: true,
-          runAsync: sqlquery.runAsync,
-          schema: sqlquery.schema,
-          sql: sqlquery.sql,
-          sql_editor_id: sqlquery.sqlEditorId,
-          tab: sqlquery.tab,
-          tmp_table_name: sqlquery.tempTable,
-          select_as_cta: sqlquery.ctas,
-          ctas_method: sqlquery.ctas_method,
-          queryLimit: sqlquery.queryLimit,
-          expand_data: true,
+            client_id: sqlquery.id,
+            database_id: sqlquery.dbId,
+            json: true,
+            runAsync: sqlquery.runAsync,
+            schema: sqlquery.schema,
+            sql: sqlquery.sql,
+            sql_editor_id: sqlquery.sqlEditorId,
+            tab: sqlquery.tab,
+            tmp_table_name: sqlquery.tempTable,
+            select_as_cta: sqlquery.ctas,
+            ctas_method: sqlquery.ctas_method,
+            queryLimit: sqlquery.queryLimit,
+            expand_data: true,
         };
-    
+
         const search = window.location.search || "";
-    
+
         try {
-          console.log("Starting query...");
-          const response = await SupersetClient.post({
-            endpoint: `/api/v1/sqllab/execute/${search}`,
-            body: JSON.stringify(postPayload),
-            headers: { "Content-Type": "application/json" },
-            parseMethod: "json-bigint",
-          });
-    
-          const { json } = response;
-    
-          if (!sqlquery.runAsync) {
-            console.log("Query successful:", json);
-          }
+            console.log("Starting query...");
+            const response = await SupersetClient.post({
+                endpoint: `/api/v1/sqllab/execute/${search}`,
+                body: JSON.stringify(postPayload),
+                headers: { "Content-Type": "application/json" },
+                parseMethod: "json-bigint",
+            });
+
+            const { json } = response;
+
+            if (json?.data) {
+                setTableData(json.data); // Save response data to state
+                console.log("Data fetched:", json.data);
+            }
+
+            if (!sqlquery.runAsync) {
+                console.log("Query successful:", json);
+            }
         } catch (response) {
-          const error = await getClientErrorObject(response);
-          let message =
-            error.error || error.message || error.statusText || t("Unknown error");
-          if (message.includes("CSRF token")) {
-            message = t(COMMON_ERR_MESSAGES.SESSION_TIMED_OUT);
-          }
-          console.error("Query failed:", message, error.link, error.errors);
+            const error = await getClientErrorObject(response);
+            let message =
+                error.error || error.message || error.statusText || t("Unknown error");
+            if (message.includes("CSRF token")) {
+                message = t(COMMON_ERR_MESSAGES.SESSION_TIMED_OUT);
+            }
+            console.error("Query failed:", message, error.link, error.errors);
         }
-      };
-    
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value); // Update state when input changes
     };
 
-    const handleSuggestionClick = (suggestion: string, index: number) => {
-        setQuery(suggestion); // Set the clicked suggestion to the input
-        //setCurrentIndex(index);
+    const handleSuggestionClick = (suggestion: typeof suggestions[0], index: number) => {
+        setQuery(suggestion.text); // Set the clicked suggestion to the input
+        setCurrentIndex(index);
         setShowSuggestions(false); // Hide suggestions after selection
     };
 
-    const handleSubmit = () => {
+    /*const handleSubmit = () => {
         // Set the index based on the current query
         console.log(runQuery(sqlquery));
         const matchedIndex = suggestions.findIndex(suggestion =>
@@ -119,6 +147,43 @@ const BioreactorBOT = () => {
         );
         if (matchedIndex !== -1) {
             setCurrentIndex(matchedIndex); // Set the iframe to the correct chart
+        }
+    };*/
+    const handleSubmit = () => {
+        // If the input matches a suggestion, use its SQL command
+        const matchedSuggestion = suggestions.find(s =>
+            s.text.toLowerCase() === query.toLowerCase()
+        );
+
+        if (matchedSuggestion) {
+            runQuery({
+                id: nanoid(11),
+                dbId: 1,
+                sql: matchedSuggestion.sql,
+                sqlEditorId: "1",
+                tab: "Suggestion Query",
+                schema: "public",
+                tempTable: "",
+                queryLimit: 100000,
+                runAsync: false,
+                ctas: false,
+                ctas_method: "TABLE",
+            });
+        } else {
+            // Assume input is a custom SQL query
+            runQuery({
+                id: nanoid(11),
+                dbId: 1,
+                sql: query, // Directly use user input as SQL
+                sqlEditorId: "1",
+                tab: "Custom Query",
+                schema: "public",
+                tempTable: "",
+                queryLimit: 100000,
+                runAsync: false,
+                ctas: false,
+                ctas_method: "TABLE",
+            });
         }
     };
 
@@ -211,7 +276,7 @@ const BioreactorBOT = () => {
 
             {/* Second row */}
             <div style={{ flex: 1, padding: "20px", backgroundColor: "#f9f9f9" }}>
-                {currentIndex !== null && embedchart[currentIndex] && (
+                {/*currentIndex !== null && embedchart[currentIndex] && (
                     <iframe
                         src={embedchart[currentIndex]} // Replace with the desired URL
                         title="Chart Representation"
@@ -221,7 +286,52 @@ const BioreactorBOT = () => {
                             border: "none",
                             borderRadius: "5px",
                         }}
-                    />)}
+                    />)*/
+                    tableData.length > 0 ? (
+                        <table
+                            style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                textAlign: "left",
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    {Object.keys(tableData[0]).map((key, index) => (
+                                        <th
+                                            key={index}
+                                            style={{
+                                                borderBottom: "1px solid #ccc",
+                                                padding: "10px",
+                                                backgroundColor: "#f1f1f1",
+                                            }}
+                                        >
+                                            {key}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tableData.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {Object.values(row).map((value, cellIndex) => (
+                                            <td
+                                                key={cellIndex}
+                                                style={{
+                                                    borderBottom: "1px solid #eee",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                {value}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>No data to display.</p>
+                    )}
             </div>
         </div>
     );
