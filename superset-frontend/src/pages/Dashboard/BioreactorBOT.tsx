@@ -248,7 +248,7 @@ const BioreactorBOT = () => {
                                             currentIndex === index ? "#f0f0f0" : "white", // Highlight selected suggestion
                                     }}
                                 >
-                                    {suggestion}
+                                    {suggestion.text}
                                 </li>
                             ))}
                         </ul>
@@ -330,7 +330,7 @@ const BioreactorBOT = () => {
                             </tbody>
                         </table>
                     ) : (
-                        <p>No data to display.</p>
+                        <p></p>
                     )}
             </div>
         </div>
