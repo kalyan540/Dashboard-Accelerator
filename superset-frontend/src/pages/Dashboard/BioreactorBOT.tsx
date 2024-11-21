@@ -54,9 +54,9 @@ const BioreactorBOT = () => {
             text: "Which plant has the best productivity?",
             sql: `SELECT 
                     plant_name, 
-                    productivity 
+                    performance AS productivity 
                   FROM 
-                    "WorldpharmaData" 
+                    "WorldbioreactorData" 
                   ORDER BY 
                     productivity DESC 
                   LIMIT 1;`,
@@ -68,7 +68,7 @@ const BioreactorBOT = () => {
                     bioreactor_name, 
                     COUNT(*) AS usage_count 
                   FROM 
-                    "WorldpharmaData" 
+                    "WorldbioreactorData" 
                   WHERE 
                     availability < 100 
                   GROUP BY 
