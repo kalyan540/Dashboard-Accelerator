@@ -78,6 +78,19 @@ const BioreactorBOT = () => {
                     usage_count ASC 
                   LIMIT 1;`,
         },
+        {
+            text: "Which is the best performing plant?",
+            sql: `SELECT 
+                plant_name, 
+                AVG(performance) AS average_performance 
+              FROM 
+                "WorldpharmaData" 
+              GROUP BY 
+                plant_name 
+              ORDER BY 
+                average_performance DESC 
+              LIMIT 1;`,
+        },
     ];
 
     const runQuery = async (sqlquery: SQLQuery) => {
