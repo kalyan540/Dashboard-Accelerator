@@ -84,7 +84,7 @@ const BioreactorBOT = () => {
                 plant_name, 
                 AVG(performance) AS average_performance 
               FROM 
-                "WorldpharmaData" 
+                "WorldbioreactorData" 
               GROUP BY 
                 plant_name 
               ORDER BY 
