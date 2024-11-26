@@ -122,6 +122,11 @@ export default class ChartClient {
             },
             ...options,
           };
+          console.log(this.client
+            .post(requestConfig)
+            .then(response =>
+              Array.isArray(response.json) ? response.json : [response.json],
+            ));
 
       return this.client
         .post(requestConfig)

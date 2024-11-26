@@ -153,7 +153,7 @@ export default class SuperChartCore extends PureComponent<Props, {}> {
   private renderChart = (loaded: LoadedModules, props: RenderProps) => {
     const { Chart, transformProps } = loaded;
     const { chartProps, preTransformProps, postTransformProps } = props;
-
+    console.log(chartProps);
     return (
       <Chart
         {...this.processChartProps({
@@ -218,7 +218,7 @@ export default class SuperChartCore extends PureComponent<Props, {}> {
     if (className) {
       containerProps.className = className;
     }
-
+    console.log(containerProps);
     return (
       <div {...containerProps} ref={this.setRef}>
         <Renderer

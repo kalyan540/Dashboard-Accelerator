@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Chatbot from './Chatbot.png';
 import { nanoid } from 'nanoid';
 import Send from './send.png';
@@ -34,6 +34,9 @@ const BioreactorBOT = () => {
     const [currentIndex, setCurrentIndex] = useState<number | null>(null); // Track the current selected query index
     const [showSuggestions, setShowSuggestions] = useState(false); // State to show/hide suggestions
     const [tableData, setTableData] = useState<any[]>([]);
+    const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
+    //const inputRef = useRef<HTMLDivElement | null>(null); // Ref to handle outside clicks
+
 
     //const { embedchart } = useID();
 
@@ -162,6 +165,23 @@ const BioreactorBOT = () => {
             setCurrentIndex(matchedIndex); // Set the iframe to the correct chart
         }
     };*/
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        // Delay hiding to allow click events on suggestions
+        setTimeout(() => setShowSuggestions(false), 150);
+    };
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                suggestionBoxRef.current &&
+                !suggestionBoxRef.current.contains(event.target as Node)
+            ) {
+                setShowSuggestions(false); // Hide dropdown if clicked outside
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
     const handleSubmit = () => {
         // If the input matches a suggestion, use its SQL command
         const matchedSuggestion = suggestions.find(s =>
@@ -221,6 +241,7 @@ const BioreactorBOT = () => {
                         placeholder="write your query"
                         value={query}
                         onChange={handleInputChange}
+                        onBlur={handleBlur}
                         onFocus={() => setShowSuggestions(true)} // Show suggestions on focus
                         style={{
                             width: "100%",
