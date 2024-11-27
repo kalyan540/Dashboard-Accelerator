@@ -36,21 +36,25 @@ def add_double_quotations(sql_query, table_names, column_names):
     :param column_names: List of column names
     :return: Formatted SQL query
     """
-    # Create a mapping of lowercase schema elements to original elements for case-insensitive matching
+    # Create a mapping for tables and columns
     table_map = {table.lower(): f'public."{table}"' for table in table_names}
     column_map = {col.lower(): f'"{col}"' for col in column_names}
 
-    # Split the query into words and replace matches
-    words = sql_query.split()
-    for i, word in enumerate(words):
-        stripped_word = re.sub(r'[^\w]', '', word)  # Remove non-alphanumeric characters for matching
-        if stripped_word.lower() in table_map:
-            # Replace the table name with the formatted version
-            words[i] = word.replace(stripped_word, table_map[stripped_word.lower()])
-        elif stripped_word.lower() in column_map:
-            # Replace the column name with the double-quoted version
-            words[i] = word.replace(stripped_word, column_map[stripped_word.lower()])
-    return " ".join(words)
+    # Define a regex pattern to identify table and column names
+    identifier_pattern = r'\b\w+\b'
+
+    # Replace table and column names using the maps
+    def replace_identifiers(match):
+        identifier = match.group(0)
+        if identifier.lower() in table_map:
+            return table_map[identifier.lower()]
+        elif identifier.lower() in column_map:
+            return column_map[identifier.lower()]
+        return identifier  # Return the original if not found
+
+    # Apply the regex pattern to the SQL query
+    formatted_query = re.sub(identifier_pattern, replace_identifiers, sql_query)
+    return formatted_query
 
 # Function to generate SQL query from the question using the transformer model
 def generate_sql_query(question):

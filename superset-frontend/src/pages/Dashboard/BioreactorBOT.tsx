@@ -2,16 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Chatbot from './Chatbot.png';
 import { nanoid } from 'nanoid';
 import Send from './send.png';
-//import { useID } from 'src/views/idOrSlugContext';
-//import { startQuery, querySuccess, queryFailed } from "src/SqlLab/actions/sqlLab";
-import {
-    SupersetClient,
-    t,
-    COMMON_ERR_MESSAGES,
-    getClientErrorObject,
-} from '@superset-ui/core';
-
-//import { Dispatch } from "redux"; // Import Dispatch for typing
+import { SupersetClient, t, COMMON_ERR_MESSAGES, getClientErrorObject } from '@superset-ui/core';
 
 // Define the type for the SQL query object
 interface SQLQuery {
@@ -28,73 +19,57 @@ interface SQLQuery {
     ctas_method: string;
 }
 
-
 const BioreactorBOT = () => {
     const [query, setQuery] = useState(""); // State to hold input value
-    const [currentIndex, setCurrentIndex] = useState<number | null>(null); // Track the current selected query index
-    const [showSuggestions, setShowSuggestions] = useState(false); // State to show/hide suggestions
+    //const [currentIndex, setCurrentIndex] = useState<number | null>(null); // Track the current selected query index
+    //const [showSuggestions, setShowSuggestions] = useState(false); // State to show/hide suggestions
     const [tableData, setTableData] = useState<any[]>([]);
-    const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
-    //const inputRef = useRef<HTMLDivElement | null>(null); // Ref to handle outside clicks
+    //const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
 
+    // WebSocket initialization
+    const socket = useRef<WebSocket | null>(null);
 
-    //const { embedchart } = useID();
+    useEffect(() => {
+        // Open WebSocket connection
+        socket.current = new WebSocket('ws://localhost:8765');
 
-    const suggestions = [
-        {
-            text: "Which is the best bioreactor in terms of performance?",
-            sql: `SELECT 
-                    plant_name,
-                    bioreactor_name, 
-                    performance 
-                  FROM 
-                    "WorldbioreactorData" 
-                  ORDER BY 
-                    performance DESC 
-                  LIMIT 1;`,
-        },
-        {
-            text: "Which plant has the best productivity?",
-            sql: `SELECT 
-                    plant_name, 
-                    performance AS productivity 
-                  FROM 
-                    "WorldbioreactorData" 
-                  ORDER BY 
-                    productivity DESC 
-                  LIMIT 1;`,
-        },
-        {
-            text: "Which bioreactor is less in use?",
-            sql: `SELECT 
-                    plant_name,
-                    bioreactor_name, 
-                    COUNT(*) AS usage_count 
-                  FROM 
-                    "WorldbioreactorData" 
-                  WHERE 
-                    availability < 100 
-                  GROUP BY 
-                    plant_name,
-                    bioreactor_name 
-                  ORDER BY 
-                    usage_count ASC 
-                  LIMIT 1;`,
-        },
-        {
-            text: "Which is the best performing plant?",
-            sql: `SELECT 
-                plant_name, 
-                AVG(performance) AS average_performance 
-              FROM 
-                "WorldbioreactorData" 
-              GROUP BY 
-                plant_name 
-              ORDER BY 
-                average_performance DESC 
-              LIMIT 1;`,
-        },
-    ];
+        socket.current.onopen = () => {
+            console.log("Connected to WebSocket server");
+        };
+
+        socket.current.onmessage = (event) => {
+            const sqlQuery = event.data; // Assuming the WebSocket server sends back the SQL query
+            console.log(`Received SQL Query: ${sqlQuery}`);
+            runQuery({
+                id: nanoid(11),
+                dbId: 1,
+                sql: sqlQuery, // Use the SQL query received from WebSocket
+                sqlEditorId: "1",
+                tab: "WebSocket Query",
+                schema: "public",
+                tempTable: "",
+                queryLimit: 100000,
+                runAsync: false,
+                ctas: false,
+                ctas_method: "TABLE",
+            });
+        };
+
+        socket.current.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        socket.current.onclose = () => {
+            console.log("Disconnected from WebSocket server");
+        };
+
+        // Cleanup on component unmount
+        return () => {
+            if (socket.current) {
+                socket.current.close();
+            }
+        };
+    }, []);
 
     const runQuery = async (sqlquery: SQLQuery) => {
         const postPayload = {
@@ -149,74 +124,13 @@ const BioreactorBOT = () => {
         setQuery(e.target.value); // Update state when input changes
     };
 
-    const handleSuggestionClick = (suggestion: typeof suggestions[0], index: number) => {
-        setQuery(suggestion.text); // Set the clicked suggestion to the input
-        setCurrentIndex(index);
-        setShowSuggestions(false); // Hide suggestions after selection
-    };
-
-    /*const handleSubmit = () => {
-        // Set the index based on the current query
-        console.log(runQuery(sqlquery));
-        const matchedIndex = suggestions.findIndex(suggestion =>
-            suggestion.toLowerCase() === query.toLowerCase()
-        );
-        if (matchedIndex !== -1) {
-            setCurrentIndex(matchedIndex); // Set the iframe to the correct chart
-        }
-    };*/
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        // Delay hiding to allow click events on suggestions
-        setTimeout(() => setShowSuggestions(false), 150);
-    };
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                suggestionBoxRef.current &&
-                !suggestionBoxRef.current.contains(event.target as Node)
-            ) {
-                setShowSuggestions(false); // Hide dropdown if clicked outside
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
     const handleSubmit = () => {
-        // If the input matches a suggestion, use its SQL command
-        const matchedSuggestion = suggestions.find(s =>
-            s.text.toLowerCase() === query.toLowerCase()
-        );
-
-        if (matchedSuggestion) {
-            runQuery({
-                id: nanoid(11),
-                dbId: 1,
-                sql: matchedSuggestion.sql,
-                sqlEditorId: "1",
-                tab: "Suggestion Query",
-                schema: "public",
-                tempTable: "",
-                queryLimit: 100000,
-                runAsync: false,
-                ctas: false,
-                ctas_method: "TABLE",
-            });
+        // Send the query input to the WebSocket server
+        if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+            socket.current.send(query); // Send the query to the WebSocket server
+            console.log("Sent query to WebSocket:", query);
         } else {
-            // Assume input is a custom SQL query
-            runQuery({
-                id: nanoid(11),
-                dbId: 1,
-                sql: query, // Directly use user input as SQL
-                sqlEditorId: "1",
-                tab: "Custom Query",
-                schema: "public",
-                tempTable: "",
-                queryLimit: 100000,
-                runAsync: false,
-                ctas: false,
-                ctas_method: "TABLE",
-            });
+            console.log("WebSocket not open yet.");
         }
     };
 
@@ -238,11 +152,9 @@ const BioreactorBOT = () => {
                 <div style={{ flex: 1, margin: "0 10px", position: "relative" }}>
                     <input
                         type="text"
-                        placeholder="write your query"
+                        placeholder="Write your query"
                         value={query}
                         onChange={handleInputChange}
-                        onBlur={handleBlur}
-                        onFocus={() => setShowSuggestions(true)} // Show suggestions on focus
                         style={{
                             width: "100%",
                             padding: "10px",
@@ -250,43 +162,6 @@ const BioreactorBOT = () => {
                             border: "1px solid #ccc",
                         }}
                     />
-                    {showSuggestions && (
-                        <ul
-                            style={{
-                                listStyleType: "none",
-                                margin: 0,
-                                padding: "5px",
-                                backgroundColor: "white",
-                                border: "1px solid #ccc",
-                                borderRadius: "5px",
-                                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                                position: "absolute",
-                                top: "100%",
-                                left: 0,
-                                right: 0,
-                                zIndex: 10,
-                            }}
-                        >
-                            {suggestions.map((suggestion, index) => (
-                                <li
-                                    key={index}
-                                    onClick={() => handleSuggestionClick(suggestion, index)}
-                                    style={{
-                                        padding: "10px",
-                                        cursor: "pointer",
-                                        borderBottom:
-                                            index !== suggestions.length - 1
-                                                ? "1px solid #ccc"
-                                                : "none",
-                                        backgroundColor:
-                                            currentIndex === index ? "#f0f0f0" : "white", // Highlight selected suggestion
-                                    }}
-                                >
-                                    {suggestion.text}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
                 </div>
                 <button
                     onClick={handleSubmit} // Trigger action on button click
@@ -310,62 +185,51 @@ const BioreactorBOT = () => {
 
             {/* Second row */}
             <div style={{ flex: 1, padding: "20px", backgroundColor: "#f9f9f9" }}>
-                {/*currentIndex !== null && embedchart[currentIndex] && (
-                    <iframe
-                        src={embedchart[currentIndex]} // Replace with the desired URL
-                        title="Chart Representation"
+                {tableData.length > 0 ? (
+                    <table
                         style={{
                             width: "100%",
-                            height: "100%",
-                            border: "none",
-                            borderRadius: "5px",
+                            borderCollapse: "collapse",
+                            textAlign: "left",
                         }}
-                    />)*/
-                    tableData.length > 0 ? (
-                        <table
-                            style={{
-                                width: "100%",
-                                borderCollapse: "collapse",
-                                textAlign: "left",
-                            }}
-                        >
-                            <thead>
-                                <tr>
-                                    {Object.keys(tableData[0]).map((key, index) => (
-                                        <th
-                                            key={index}
+                    >
+                        <thead>
+                            <tr>
+                                {Object.keys(tableData[0]).map((key, index) => (
+                                    <th
+                                        key={index}
+                                        style={{
+                                            borderBottom: "1px solid #ccc",
+                                            padding: "10px",
+                                            backgroundColor: "#f1f1f1",
+                                        }}
+                                    >
+                                        {key}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tableData.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                    {Object.values(row).map((value, cellIndex) => (
+                                        <td
+                                            key={cellIndex}
                                             style={{
-                                                borderBottom: "1px solid #ccc",
+                                                borderBottom: "1px solid #eee",
                                                 padding: "10px",
-                                                backgroundColor: "#f1f1f1",
                                             }}
                                         >
-                                            {key}
-                                        </th>
+                                            {value}
+                                        </td>
                                     ))}
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {tableData.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        {Object.values(row).map((value, cellIndex) => (
-                                            <td
-                                                key={cellIndex}
-                                                style={{
-                                                    borderBottom: "1px solid #eee",
-                                                    padding: "10px",
-                                                }}
-                                            >
-                                                {value}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p></p>
-                    )}
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p>No data available.</p>
+                )}
             </div>
         </div>
     );
