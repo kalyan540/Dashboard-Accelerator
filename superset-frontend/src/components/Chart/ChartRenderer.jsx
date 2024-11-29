@@ -242,6 +242,29 @@ class ChartRenderer extends Component {
     }
   }
 
+  removeAggregations() {
+    if (Array.isArray(this.mutableQueriesResponse)) {
+      this.mutableQueriesResponse = this.mutableQueriesResponse.map(query => {
+        if (query.data && Array.isArray(query.data)) {
+          query.data = query.data.map(row => {
+            const cleanedRow = {};
+            Object.entries(row).forEach(([key, value]) => {
+              // Regex to remove aggregation functions and brackets
+              const cleanedKey = key.replace(/^(MAX|MIN|SUM|AVG|COUNT|COUNT_DISTINCT)\((.*?)\)$/i, '$2');
+              cleanedRow[cleanedKey] = value;
+            });
+            return cleanedRow;
+          });
+        }
+        return query;
+      });
+  
+      console.log('Updated data with cleaned keys:', this.mutableQueriesResponse);
+    } else {
+      console.warn('mutableQueriesResponse is not an array or is undefined.');
+    }
+  }
+
   render() {
     const { chartAlert, chartStatus, chartId, emitCrossFilters } = this.props;
 
@@ -322,7 +345,7 @@ class ChartRenderer extends Component {
       ?.behaviors.find(behavior => behavior === Behavior.DrillToDetail)
       ? { inContextMenu: this.state.inContextMenu }
       : {};
-
+    this.removeAggregations();
     return (
       <>
         {this.state.showContextMenu && (
@@ -339,6 +362,7 @@ class ChartRenderer extends Component {
             this.state.showContextMenu ? this.onContextMenuFallback : undefined
           }
         >
+          {console.log(this.mutableQueriesResponse)}
           <SuperChart
             disableErrorBoundary
             key={`${chartId}${webpackHash}`}
