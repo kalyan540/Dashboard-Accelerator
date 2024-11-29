@@ -21,7 +21,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardPage } from 'src/dashboard/containers/DashboardPage';
 import './Buttons.css';
 import AlertList from '../AlertReportList';
-import Analytics from './Analytics';
+//import Analytics from './Analytics';
 import UserManagement from './usermanagement';
 import Bioreactor from './bioreactor';
 import AlertTable from './AlertTable';
