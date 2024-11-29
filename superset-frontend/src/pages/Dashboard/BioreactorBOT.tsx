@@ -184,24 +184,41 @@ const BioreactorBOT = () => {
             </div>
 
             {/* Second row */}
-            <div style={{ flex: 1, padding: "20px", backgroundColor: "#f9f9f9" }}>
+            <div
+                style={{
+                    padding: "20px",
+                    backgroundColor: "#f3f4f6",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                }}
+            >
                 {tableData.length > 0 ? (
                     <table
                         style={{
                             width: "100%",
                             borderCollapse: "collapse",
-                            textAlign: "left",
+                            borderRadius: "10px",
+                            overflow: "hidden",
                         }}
                     >
-                        <thead>
+                        <thead
+                            style={{
+                                backgroundColor: "#374151",
+                                color: "#ffffff",
+                            }}
+                        >
                             <tr>
                                 {Object.keys(tableData[0]).map((key, index) => (
                                     <th
                                         key={index}
                                         style={{
-                                            borderBottom: "1px solid #ccc",
-                                            padding: "10px",
-                                            backgroundColor: "#f1f1f1",
+                                            padding: "12px 15px",
+                                            textAlign: "left",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.5px",
+                                            borderBottom: "2px solid #e5e7eb",
                                         }}
                                     >
                                         {key}
@@ -211,13 +228,22 @@ const BioreactorBOT = () => {
                         </thead>
                         <tbody>
                             {tableData.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
+                                <tr
+                                    key={rowIndex}
+                                    style={{
+                                        backgroundColor: rowIndex % 2 === 0 ? "#f9fafb" : "#ffffff",
+                                        transition: "background-color 0.3s ease",
+                                    }}
+                                >
                                     {Object.values(row).map((value, cellIndex) => (
                                         <td
                                             key={cellIndex}
                                             style={{
-                                                borderBottom: "1px solid #eee",
-                                                padding: "10px",
+                                                padding: "12px 15px",
+                                                fontSize: "14px",
+                                                color: "#374151",
+                                                borderBottom: "1px solid #e5e7eb",
+                                                textAlign: "left",
                                             }}
                                         >
                                             {value}
@@ -228,9 +254,12 @@ const BioreactorBOT = () => {
                         </tbody>
                     </table>
                 ) : (
-                    <p>No data available.</p>
+                    <p style={{ textAlign: "center", color: "#6b7280", fontSize: "16px" }}>
+                        No data available.
+                    </p>
                 )}
             </div>
+
         </div>
     );
 };

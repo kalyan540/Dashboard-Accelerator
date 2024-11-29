@@ -97,7 +97,7 @@ const DashboardRoute: FC = () => {
             onClick={() => handleButtonClick('Analytics')}
           >
             <img src="/static/assets/images/Analytics.png" alt="Icon" className="icon" />
-            Advanced Analytics
+            Analytics
           </button>
           <button
             className={`button ${activeButton === 'Assert Model' ? 'active' : ''}`}
@@ -202,7 +202,7 @@ const DashboardRoute: FC = () => {
           : activeButton === 'Bioreactor' ? (
             <Bioreactor />
           ) : activeButton === 'Analytics' ? (
-            <Analytics />
+            <DashboardPage idOrSlug={'22'} />
           ) : (
             <div>
               <h2>This page is in development.</h2>
