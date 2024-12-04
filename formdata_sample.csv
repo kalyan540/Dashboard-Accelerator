@@ -1,0 +1,4 @@
+functionName,group,business,assessmentLead,assessmentID,maturity,assessmentDate,status,actions,assessmentType
+Finance,Group A,Corp Inc.,John Doe,A001,High,2024-01-01,Published,Review,Internal
+HR,Group B,Global Ltd.,Jane Smith,A002,Medium,2024-01-15,In Progress,Update,External
+IT,Group C,Tech Solutions,Mike Brown,A003,Low,2024-02-01,Pending,Plan,Internal

@@ -24,6 +24,8 @@
             grant_permissions_query = f"""GRANT SELECT ON TABLE {database}.public.{table_name} TO PUBLIC;"""
             cur.execute(grant_permissions_query)
 
+            columns = rows[0].keys()
+
             for entry in rows:
                 insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
                 VALUES ({", ".join(['%s' for _ in columns])});"""
