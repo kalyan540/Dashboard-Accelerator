@@ -733,70 +733,45 @@ class SupersetIndexView(IndexView):
 
     @expose("/api/dataset/update", methods=["POST"])
     def update_dataset(self) -> FlaskResponse:
-        
-        db_config = {
-            "dbname": "examples",
-            "user": "superset",
-            "password": "superset",
-            "host": "superset_db",  # Your PostgreSQL host
-            "port": "5432"
-        }
 
         try:
             # Extract data from the request body
             body = request.get_json()
-            keys = body.get('keys', [])
-            url = body.get('url', '')
+            database = body.get('database', '')
             table_name = body.get('table_name', '')
-            print(f"Keys:{keys}")
+            rows = body.get('formData', [])
 
-            if not keys or not url or not table_name:
-                return jsonify({'error': 'Missing keys, url, or table_name in the request body'}), 400
-
-            # Fetch data from the API
-            response = requests.get(url)
-            if response.status_code != 200:
-                return jsonify({'error': 'Failed to fetch data from the API'}), 500
-
-            api_data = response.json()
-            # Example selected keys
-            selected_keys = keys
-            split_keys = [key.split('.') for key in selected_keys]
-            columns = [split_key[-1] for split_key in split_keys]
-
-            # Process the results
-            rows = self.process_results(api_data, split_keys)
+            db_config = {
+            "dbname": database,
+            "user": "superset",
+            "password": "superset",
+            "host": "db",  # Your PostgreSQL host
+            "port": "5432"
+            }
+            if not database or not table_name:
+                return jsonify({'error': 'Missing database or table_name in the request body'}), 400
 
             conn = psycopg2.connect(**db_config)
             cur = conn.cursor()
-            # Create table dynamically based on the columns from the API response
-            create_table_query = f"""CREATE TABLE IF NOT EXISTS {table_name} (
-                {", ".join([f'"{col}" TEXT' for col in columns])}
-            );"""
-            cur.execute(create_table_query)
+            # Grant necessary permissions to the user 'admin'
+            grant_permissions_query = f"""GRANT SELECT ON TABLE {database}.public.{table_name} TO PUBLIC;"""
+            cur.execute(grant_permissions_query)
 
             for entry in rows:
                 insert_query = f"""INSERT INTO {table_name} ({", ".join([f'"{col}"' for col in columns])}) 
                 VALUES ({", ".join(['%s' for _ in columns])});"""
                 cur.execute(insert_query, entry)
-            # Grant necessary permissions to the user 'admin'
-            grant_permissions_query = f"""GRANT SELECT ON TABLE examples.public.{table_name} TO PUBLIC;"""
-            cur.execute(grant_permissions_query)
 
             conn.commit()
             cur.close()
             conn.close()
             # For testing: print rows to logger
             for row in rows:
-                #logger.info(f"Row: {row}")
+                logger.info(f"Row: {row}")
                 print(f"Row: {row}")
 
-            # Placeholder for database insertion logic
-            # self.insert_rows_into_db(table_name, rows)
-
             return jsonify({
-                'message': f'Successfully extracted {len(rows)} rows',
-                'columns': columns  # Return columns
+                'message': f'Successfully inserted {len(rows)} row(s)'
             }), 200
         except Exception as e:
             print(f"Error occurred: {e}")
