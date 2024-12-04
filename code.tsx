@@ -190,6 +190,7 @@ export default function SupersetPluginChartPage(props: SupersetPluginChartPagePr
                   return;
                 }
                 console.log("Form Data Submitted:", formData);
+                console.log("Code.tsx");
                 setFormData({
                   functionName: '',
                   group: '',
