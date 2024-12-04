@@ -111,6 +111,25 @@ export default function SupersetPluginChartPage(props: SupersetPluginChartPagePr
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns = Object.keys(data[0] || {});
+  const [formData, setFormData] = useState({
+    functionName: '',
+    group: '',
+    business: '',
+    assessmentLead: '',
+    assessmentID: '',
+    maturity: '',
+    assessmentDate: '',
+    status: '',
+    actions: '',
+    assessmentType: '',
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
 
   // Update the filtered data based on selected filters
   useEffect(() => {
@@ -161,10 +180,132 @@ export default function SupersetPluginChartPage(props: SupersetPluginChartPagePr
             >
               &times;
             </span>
-            <form className="modal-form">
-              <input type="text" placeholder="Name" required />
-              <input type="text" placeholder="Project" required />
-              <input type="text" placeholder="Employee ID" required />
+            <form
+              className="modal-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const isAllFilled = Object.values(formData).every((value) => value !== '');
+                if (!isAllFilled) {
+                  alert("Please fill out all fields!");
+                  return;
+                }
+                console.log("Form Data Submitted:", formData);
+                setFormData({
+                  functionName: '',
+                  group: '',
+                  business: '',
+                  assessmentLead: '',
+                  assessmentID: '',
+                  maturity: '',
+                  assessmentDate: '',
+                  status: '',
+                  actions: '',
+                  assessmentType: '',
+                });
+                setIsModalOpen(false);
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Function Name"
+                value={formData.functionName}
+                onChange={(e) => handleInputChange('functionName', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Group"
+                value={formData.group}
+                onChange={(e) => handleInputChange('group', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Business"
+                value={formData.business}
+                onChange={(e) => handleInputChange('business', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment Lead"
+                value={formData.assessmentLead}
+                onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment ID"
+                value={formData.assessmentID}
+                onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Maturity"
+                value={formData.maturity}
+                onChange={(e) => handleInputChange('maturity', e.target.value)}
+                required
+              />
+              <input
+                type="date"
+                placeholder="Assessment Date"
+                value={formData.assessmentDate}
+                onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+                required
+              />
+              <div>
+                <label>Status:</label>
+                <div>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="Published"
+                      checked={formData.status === 'Published'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    Published
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="In Progress"
+                      checked={formData.status === 'In Progress'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    In Progress
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="Pending"
+                      checked={formData.status === 'Pending'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    Pending
+                  </label>
+                </div>
+              </div>
+              <input
+                type="text"
+                placeholder="Actions"
+                value={formData.actions}
+                onChange={(e) => handleInputChange('actions', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment Type"
+                value={formData.assessmentType}
+                onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+                required
+              />
               <button type="submit">Submit</button>
             </form>
           </div>
