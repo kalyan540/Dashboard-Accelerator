@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createRef } from 'react';
-import { styled } from '@superset-ui/core';
+import { SupersetClient, styled } from '@superset-ui/core';
 import { SupersetPluginChartPageProps, SupersetPluginChartPageStylesProps } from './types';
 
 const Styles = styled.div<SupersetPluginChartPageStylesProps>`
@@ -103,12 +103,14 @@ const Styles = styled.div<SupersetPluginChartPageStylesProps>`
 `;
 
 export default function SupersetPluginChartPage(props: SupersetPluginChartPageProps) {
-  const { data, height, width } = props;
+  const { data, height, width, datasource } = props;
 
   const rootElem = createRef<HTMLDivElement>();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filteredData, setFilteredData] = useState(data);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [DBName, setDBName] = useState<string | null>(null);
+  const [DBName, setDBName] = useState<string | null>(null);
 
   const columns = Object.keys(data[0] || {});
   const [formData, setFormData] = useState({
@@ -182,7 +184,7 @@ export default function SupersetPluginChartPage(props: SupersetPluginChartPagePr
             </span>
             <form
               className="modal-form"
-              onSubmit={(e) => {
+              onSubmit={async(e) => {
                 e.preventDefault();
                 const isAllFilled = Object.values(formData).every((value) => value !== '');
                 if (!isAllFilled) {
@@ -190,7 +192,25 @@ export default function SupersetPluginChartPage(props: SupersetPluginChartPagePr
                   return;
                 }
                 console.log("Form Data Submitted:", formData);
-                console.log("Code.tsx");
+                const payload = { ...formData };
+                try {
+                  // Append data to list (you can handle this in state or backend later)
+                  console.log('Appending to list:', payload);
+
+                  // Send POST request to Superset endpoint
+                  const response = await SupersetClient.post({
+                    endpoint: '/api/v1/data/', // Replace with your actual endpoint
+                    jsonPayload: { formData: payload },
+                  });
+
+                  if (response.json) {
+                    console.log('Data successfully submitted:', response.json);
+                    alert('Form data submitted successfully!');
+                  }
+                } catch (error) {
+                  console.error('Error submitting form data:', error);
+                  alert('Failed to submit data. Please try again.');
+                }
                 setFormData({
                   functionName: '',
                   group: '',
